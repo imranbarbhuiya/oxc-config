@@ -31,7 +31,6 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 
 		function checkThrowNode(node: TSESTree.ThrowStatement, fnType: string) {
 			const arg = node.argument;
-			if (!arg) return;
 
 			if (arg.type === 'NewExpression' && arg.callee.type === 'Identifier') {
 				if (ALLOWED_ERROR_NAMES.has(arg.callee.name)) return;
@@ -52,8 +51,12 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 			}
 		}
 
+		function isAstNode(value: unknown): value is TSESTree.Node {
+			return typeof value === 'object' && value !== null && 'type' in value && typeof value.type === 'string';
+		}
+
 		function walkThrows(node: TSESTree.Node | null | undefined, fnType: string, visited = new Set<TSESTree.Node>()) {
-			if (!node || typeof node !== 'object' || visited.has(node)) return;
+			if (!node || visited.has(node)) return;
 			visited.add(node);
 
 			if (node.type === 'ThrowStatement') {
@@ -70,12 +73,12 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 				return;
 			}
 
-			for (const key of Object.keys(node) as (keyof typeof node)[]) {
+			for (const key of Object.keys(node)) {
 				if (key === 'parent' || key === 'loc' || key === 'range') continue;
-				const child = node[key];
-				if (Array.isArray(child)) for (const c of child) walkThrows(c as TSESTree.Node, fnType, visited);
-				else if (child && typeof child === 'object' && 'type' in child && typeof child.type === 'string')
-					walkThrows(child as TSESTree.Node, fnType, visited);
+				const child = (node as unknown as Record<string, unknown>)[key];
+				if (Array.isArray(child)) {
+					for (const c of child) if (isAstNode(c)) walkThrows(c, fnType, visited);
+				} else if (isAstNode(child)) walkThrows(child, fnType, visited);
 			}
 		}
 
@@ -95,7 +98,7 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 
 		function checkThrowStatement(node: TSESTree.ThrowStatement) {
 			if (fnStack.length === 0) return;
-			checkThrowNode(node, fnStack[fnStack.length - 1]!);
+			checkThrowNode(node, fnStack[fnStack.length - 1]);
 		}
 
 		function recordExtractedRef(prop: TSESTree.Property) {
