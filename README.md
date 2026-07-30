@@ -164,7 +164,7 @@ This package contains eslint config for
 The following configs are opt-in and are offered by the CLI only when relevant to your project. They are intentionally not bundled into `next` or `native`:
 
 - `i18n` rules for Next.js projects using [`next-intl`](https://next-intl.dev) (enforces static `t()` keys and disallows passing `t` around). Use alongside `next`.
-- `native-tailwind` rules for React Native projects using Tailwind (forbids `flex`/`flex-col`, `font-[Inter]`, and maps `font-*` weights to `inter-*`). Use alongside `native` and `tailwind`.
+- `native-tailwind` rules for React Native projects using Tailwind (forbids `flex`/`flex-col`). Use alongside `native` and `tailwind`.
 - `central-icons` rules for React or React Native projects using `@central-icons-react*` packages (forbids barrel imports and autofixes to direct subpath imports). Use alongside `react`, `native`, or `next`.
 - `api-error` rules for TanStack Query projects (requires `ApiError` instead of `Error` inside `queryFn`/`mutationFn`, including extracted handlers). Use alongside `react`, `native`, or `next`.
 
