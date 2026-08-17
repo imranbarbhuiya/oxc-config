@@ -97,7 +97,7 @@ export default [
 
 You can remove any of the configs you don't need.
 
-`api-error` accepts `allowedErrors` (default `['ApiError', 'FormValidationError']`). That list is what you may `throw new Class(...)` or `throw Class.from(...)` inside `queryFn` / `mutationFn`:
+`api-error` accepts `allowedErrors` (default `['ApiError', 'FormValidationError']`). That list is what you may `throw new Class(...)` or `throw Class.from(...)` inside `queryFn` / `mutationFn`. Other constructors (`new Error`) and other factories (`Other.from(...)`) are reported:
 
 ```js
 {
@@ -179,7 +179,7 @@ The following configs are opt-in and are offered by the CLI only when relevant t
 - `i18n` rules for Next.js projects using [`next-intl`](https://next-intl.dev) (enforces static `t()` keys and disallows passing `t` around). Use alongside `next`.
 - `native-tailwind` rules for React Native projects using Tailwind (forbids `flex`/`flex-col`). Use alongside `native` and `tailwind`.
 - `central-icons` rules for React or React Native projects using `@central-icons-react*` packages (forbids barrel imports and autofixes to direct subpath imports). Use alongside `react`, `native`, or `next`.
-- `api-error` rules for TanStack Query projects (requires an allowed error class instead of `Error` inside `queryFn`/`mutationFn`, including extracted handlers). Allows `new ApiError(...)` and `ApiError.from(...)`. Override `allowedErrors` in your ESLint config if your class names differ. Use alongside `react`, `native`, or `next`.
+- `api-error` rules for TanStack Query projects (requires an allowed error class instead of `Error` inside `queryFn`/`mutationFn`, including extracted handlers). Allows `new ApiError(...)` and `ApiError.from(...)`; reports other constructors and factories. Override `allowedErrors` in your ESLint config if your class names differ. Use alongside `react`, `native`, or `next`.
 
 ## Contributors ✨
 

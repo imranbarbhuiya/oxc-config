@@ -8,7 +8,7 @@ type Options = [
 	},
 ];
 
-const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', Options> = {
+const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorCall' | 'useApiErrorMember', Options> = {
 	meta: {
 		type: 'problem',
 		docs: {
@@ -32,6 +32,8 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 		messages: {
 			useApiError:
 				'Use `new {{allowed}}(...)` or `{{allowed}}.from(...)` instead of `new {{thrown}}(...)` inside {{fnType}}. This ensures the HTTP status code is available in QueryCache/retry/error reporting.',
+			useApiErrorCall:
+				'Use `new {{allowed}}(...)` or `{{allowed}}.from(...)` instead of `{{thrown}}(...)` inside {{fnType}}. This ensures the HTTP status code is available in QueryCache/retry/error reporting.',
 			useApiErrorMember:
 				'Throw `new {{allowed}}(...)` or `{{allowed}}.from(...)` instead of re-throwing `{{thrown}}` directly inside {{fnType}}. The client error object may lose its HTTP status code in QueryCache/retry/error reporting.',
 		},
@@ -52,17 +54,20 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 			if (!moduleFns.has(name)) moduleFns.set(name, body);
 		}
 
+		function getStaticFactoryCallee(arg: TSESTree.ThrowStatement['argument']) {
+			if (arg.type !== 'CallExpression') return undefined;
+			const { callee } = arg;
+			if (callee.type !== 'MemberExpression' || callee.computed) return undefined;
+			const { object, property } = callee;
+			if (object.type !== 'Identifier' || property.type !== 'Identifier') return undefined;
+			return { callee, name: object.name };
+		}
+
 		function isAllowedThrow(arg: TSESTree.ThrowStatement['argument']) {
 			if (arg.type === 'NewExpression' && arg.callee.type === 'Identifier') return allowedErrors.has(arg.callee.name);
 
-			return (
-				arg.type === 'CallExpression' &&
-				arg.callee.type === 'MemberExpression' &&
-				!arg.callee.computed &&
-				arg.callee.object.type === 'Identifier' &&
-				arg.callee.property.type === 'Identifier' &&
-				allowedErrors.has(arg.callee.object.name)
-			);
+			const factory = getStaticFactoryCallee(arg);
+			return factory !== undefined && allowedErrors.has(factory.name);
 		}
 
 		function checkThrowNode(node: TSESTree.ThrowStatement, fnType: string) {
@@ -74,6 +79,16 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 					node: arg,
 					messageId: 'useApiError',
 					data: { thrown: arg.callee.name, fnType, allowed: allowedExample },
+				});
+				return;
+			}
+
+			const factory = getStaticFactoryCallee(arg);
+			if (factory) {
+				context.report({
+					node: arg,
+					messageId: 'useApiErrorCall',
+					data: { thrown: sourceCode.getText(factory.callee), fnType, allowed: allowedExample },
 				});
 				return;
 			}
