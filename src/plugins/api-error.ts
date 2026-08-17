@@ -1,25 +1,48 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
-const ALLOWED_ERROR_NAMES = new Set(['ApiError', 'FormValidationError']);
+const DEFAULT_ALLOWED_ERRORS = ['ApiError', 'FormValidationError'];
 
-const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', []> = {
+type Options = [
+	{
+		allowedErrors?: string[];
+	},
+];
+
+const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', Options> = {
 	meta: {
 		type: 'problem',
 		docs: {
 			description:
-				'Require ApiError instead of Error inside queryFn/mutationFn so status codes propagate to QueryCache error handling',
+				'Require an allowed API error instead of Error inside queryFn/mutationFn so status codes propagate to QueryCache error handling',
 		},
-		schema: [],
+		schema: [
+			{
+				type: 'object',
+				additionalProperties: false,
+				properties: {
+					allowedErrors: {
+						type: 'array',
+						items: { type: 'string', minLength: 1 },
+						minItems: 1,
+						uniqueItems: true,
+					},
+				},
+			},
+		],
 		messages: {
 			useApiError:
-				'Use `new ApiError(message, status)` instead of `new {{thrown}}(...)` inside {{fnType}}. This ensures the HTTP status code is available in QueryCache/retry/error reporting.',
+				'Use `new {{allowed}}(...)` or `{{allowed}}.from(...)` instead of `new {{thrown}}(...)` inside {{fnType}}. This ensures the HTTP status code is available in QueryCache/retry/error reporting.',
 			useApiErrorMember:
-				'Throw `new ApiError(message, status)` instead of re-throwing `{{thrown}}` directly inside {{fnType}}. The client error object may lose its HTTP status code in QueryCache/retry/error reporting.',
+				'Throw `new {{allowed}}(...)` or `{{allowed}}.from(...)` instead of re-throwing `{{thrown}}` directly inside {{fnType}}. The client error object may lose its HTTP status code in QueryCache/retry/error reporting.',
 		},
 	},
-	defaultOptions: [],
+	defaultOptions: [{ allowedErrors: [...DEFAULT_ALLOWED_ERRORS] }],
 	create(context) {
 		const sourceCode = context.sourceCode;
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		const allowedList = context.options[0]?.allowedErrors ?? DEFAULT_ALLOWED_ERRORS;
+		const allowedErrors = new Set(allowedList);
+		const allowedExample = allowedList[0] ?? DEFAULT_ALLOWED_ERRORS[0];
 		const fnStack: string[] = [];
 		const extractedRefs: { name: string; fnType: string }[] = [];
 		const moduleFns = new Map<string, TSESTree.Node>();
@@ -29,15 +52,28 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 			if (!moduleFns.has(name)) moduleFns.set(name, body);
 		}
 
+		function isAllowedThrow(arg: TSESTree.ThrowStatement['argument']) {
+			if (arg.type === 'NewExpression' && arg.callee.type === 'Identifier') return allowedErrors.has(arg.callee.name);
+
+			return (
+				arg.type === 'CallExpression' &&
+				arg.callee.type === 'MemberExpression' &&
+				!arg.callee.computed &&
+				arg.callee.object.type === 'Identifier' &&
+				arg.callee.property.type === 'Identifier' &&
+				allowedErrors.has(arg.callee.object.name)
+			);
+		}
+
 		function checkThrowNode(node: TSESTree.ThrowStatement, fnType: string) {
 			const arg = node.argument;
+			if (isAllowedThrow(arg)) return;
 
 			if (arg.type === 'NewExpression' && arg.callee.type === 'Identifier') {
-				if (ALLOWED_ERROR_NAMES.has(arg.callee.name)) return;
 				context.report({
 					node: arg,
 					messageId: 'useApiError',
-					data: { thrown: arg.callee.name, fnType },
+					data: { thrown: arg.callee.name, fnType, allowed: allowedExample },
 				});
 				return;
 			}
@@ -46,7 +82,7 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorMember', 
 				context.report({
 					node: arg,
 					messageId: 'useApiErrorMember',
-					data: { thrown: sourceCode.getText(arg), fnType },
+					data: { thrown: sourceCode.getText(arg), fnType, allowed: allowedExample },
 				});
 			}
 		}
