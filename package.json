@@ -21,10 +21,10 @@
 	"author": "Parbez <imranbarbhuiya.fsd@gmail.com>",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/imranbarbhuiya/oxc-config.git"
+		"url": "git+https://github.com/imranbarbhuiya/oxc-config.git"
 	},
 	"bin": {
-		"oxc-config": "./dist/cli/index.js"
+		"oxc-config": "dist/cli/index.js"
 	},
 	"files": [
 		"dist/**"
