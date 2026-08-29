@@ -4,13 +4,16 @@ import type { ESTree } from '@oxlint/plugins';
 
 const DEFAULT_LOCALE = 'en-US';
 
-function isSortable(node: ESTree.ArrayExpressionElement): node is ESTree.CallExpression | ESTree.IdentifierName | ESTree.IdentifierReference {
+function isSortable(
+	node: ESTree.ArrayExpressionElement,
+): node is ESTree.CallExpression | ESTree.IdentifierName | ESTree.IdentifierReference {
 	return node?.type === 'Identifier' || node?.type === 'CallExpression';
 }
 
 function nodeName(node: ESTree.CallExpression | ESTree.IdentifierName | ESTree.IdentifierReference) {
 	if (node.type === 'Identifier') return node.name;
-	if (node.callee.type === 'MemberExpression' && node.callee.object.type === 'Identifier') return node.callee.object.name;
+	if (node.callee.type === 'MemberExpression' && node.callee.object.type === 'Identifier')
+		return node.callee.object.name;
 	return '';
 }
 

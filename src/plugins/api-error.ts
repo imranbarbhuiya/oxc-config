@@ -14,7 +14,7 @@ function getStaticFactoryCallee(arg: ESTree.Node) {
 }
 
 function isAstNode(value: unknown): value is ESTree.Node {
-	return typeof value === 'object' && value !== null && 'type' in value && typeof (value as { type: unknown }).type === 'string';
+	return typeof value === 'object' && value !== null && 'type' in value && typeof value.type === 'string';
 }
 
 const requireApiError = defineRule({

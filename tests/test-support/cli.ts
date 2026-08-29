@@ -73,7 +73,7 @@ export async function withOxlintProject<T>(
 	source: string,
 	relativeFile: string,
 	configs: string[],
-	callback: (project: Project) => Promise<T>,
+	run: (project: Project) => Promise<T>,
 	extra?: { rules?: Record<string, unknown> },
 ): Promise<T> {
 	const project = await createProject(source, relativeFile);
@@ -83,7 +83,7 @@ export async function withOxlintProject<T>(
 			await Bun.write(join(project.directory, 'app/globals.css'), '@import "tailwindcss";\n');
 		}
 		await writeOxlintConfig(project.directory, configs, extra);
-		return await callback(project);
+		return await run(project);
 	} finally {
 		await rm(project.directory, { force: true, recursive: true });
 	}
@@ -92,12 +92,12 @@ export async function withOxlintProject<T>(
 export async function withOxfmtProject<T>(
 	source: string,
 	relativeFile: string,
-	callback: (project: Project) => Promise<T>,
+	run: (project: Project) => Promise<T>,
 ): Promise<T> {
 	const project = await createProject(source, relativeFile);
 	try {
 		await writeOxfmtConfig(project.directory);
-		return await callback(project);
+		return await run(project);
 	} finally {
 		await rm(project.directory, { force: true, recursive: true });
 	}

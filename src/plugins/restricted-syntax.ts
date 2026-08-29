@@ -19,13 +19,13 @@ function restrictionMessage(restriction: Restriction) {
 }
 
 function isAstNode(value: unknown): value is ESTree.Node {
-	return typeof value === 'object' && value !== null && 'type' in value && typeof (value as { type: unknown }).type === 'string';
+	return typeof value === 'object' && value !== null && 'type' in value && typeof value.type === 'string';
 }
 
 function pathValue(node: ESTree.Node, path: string) {
 	let current: unknown = node;
 	for (const part of path.split('.')) {
-		if (current == null || typeof current !== 'object') return undefined;
+		if (current === null || current === undefined || typeof current !== 'object') return undefined;
 		current = (current as Record<string, unknown>)[part];
 	}
 	return current;
@@ -36,7 +36,7 @@ function matchAttributes(node: ESTree.Node, attributes: string) {
 		const expression = attribute[1];
 		const equal = /^(.+?)=(?:'([^']*)'|"([^"]*)")$/.exec(expression);
 		if (!equal) return false;
-		if (String(pathValue(node, equal[1].trim())) !== (equal[2] ?? equal[3])) return false;
+		if (String(pathValue(node, equal[1].trim())) !== (equal.at(2) ?? equal.at(3))) return false;
 	}
 	return true;
 }
@@ -46,7 +46,7 @@ function matchSimple(node: ESTree.Node, simple: string) {
 	if (!type || node.type !== type) return false;
 	const not = /:not\((?<inner>[^)]*)\)/.exec(simple);
 	if (not?.groups?.inner && matchAttributes(node, not.groups.inner)) return false;
-	return matchAttributes(node, simple.replace(/:not\([^)]*\)/g, ''));
+	return matchAttributes(node, simple.replaceAll(/:not\([^)]*\)/g, ''));
 }
 
 function matchSelector(node: ESTree.Node, selector: string) {
