@@ -1,7 +1,6 @@
+import { describe, expect, test } from 'bun:test';
 import { readFile, readdir } from 'node:fs/promises';
 import { basename, join } from 'node:path';
-
-import { describe, expect, test } from 'bun:test';
 
 import { runOxfmt, runOxlint, withOxfmtProject, withOxlintProject } from './test-support/cli.js';
 

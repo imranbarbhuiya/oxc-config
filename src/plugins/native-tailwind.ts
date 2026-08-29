@@ -1,24 +1,24 @@
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { definePlugin, defineRule } from '@oxlint/plugins';
 
-const classNameRules: TSESLint.RuleModule<'flexOnly' | 'forbidden', []> = {
+import type { ESTree } from '@oxlint/plugins';
+
+const FORBIDDEN = new Set(['flex-col']);
+
+const classNameRules = defineRule({
 	meta: {
 		type: 'problem',
 		docs: {
 			description: 'Disallow Tailwind flex-col, and standalone flex',
 		},
 		fixable: 'code',
-		schema: [],
 		messages: {
 			forbidden: "Class '{{cls}}' is the default in react-native, so no need to explicitly set it.",
 			flexOnly: "Class 'flex' should be removed or changed to 'flex-row' for explicit direction.",
 		},
 		hasSuggestions: true,
 	},
-	defaultOptions: [],
-	create(context) {
-		const FORBIDDEN = new Set(['flex-col']);
-
-		function reportAndFix(node: TSESTree.Node, text: string, raw: string) {
+	createOnce(context) {
+		function reportAndFix(node: ESTree.Node, text: string, raw: string | null) {
 			const classes = text.trim().split(/\s+/);
 			const hasFlex = classes.includes('flex');
 			const hasFlexCol = classes.includes('flex-col');
@@ -35,7 +35,7 @@ const classNameRules: TSESLint.RuleModule<'flexOnly' | 'forbidden', []> = {
 					fix(fixer) {
 						const kept = classes.filter((cl) => cl !== 'flex' && !FORBIDDEN.has(cl));
 						const finalClasses = kept.join(' ');
-						const quote = raw.startsWith("'") ? "'" : '"';
+						const quote = (raw ?? '"').startsWith("'") ? "'" : '"';
 						return fixer.replaceText(node, `${quote}${finalClasses}${quote}`);
 					},
 				});
@@ -50,7 +50,7 @@ const classNameRules: TSESLint.RuleModule<'flexOnly' | 'forbidden', []> = {
 					fix(fixer) {
 						const kept = classes.filter((cl) => cl !== 'flex' && cl !== 'flex-col' && !FORBIDDEN.has(cl));
 						const finalClasses = kept.join(' ');
-						const quote = raw.startsWith("'") ? "'" : '"';
+						const quote = (raw ?? '"').startsWith("'") ? "'" : '"';
 						return fixer.replaceText(node, `${quote}${finalClasses}${quote}`);
 					},
 				});
@@ -65,7 +65,7 @@ const classNameRules: TSESLint.RuleModule<'flexOnly' | 'forbidden', []> = {
 					fix(fixer) {
 						const kept = classes.filter((cl) => cl !== 'flex-col' && !FORBIDDEN.has(cl));
 						const finalClasses = kept.join(' ');
-						const quote = raw.startsWith("'") ? "'" : '"';
+						const quote = (raw ?? '"').startsWith("'") ? "'" : '"';
 						return fixer.replaceText(node, `${quote}${finalClasses}${quote}`);
 					},
 				});
@@ -84,7 +84,7 @@ const classNameRules: TSESLint.RuleModule<'flexOnly' | 'forbidden', []> = {
 							fix(fixer) {
 								const replacedClasses = classes.map((cl) => (cl === 'flex' ? 'flex-row' : cl));
 								const finalClasses = replacedClasses.join(' ');
-								const quote = raw.startsWith("'") ? "'" : '"';
+								const quote = (raw ?? '"').startsWith("'") ? "'" : '"';
 								return fixer.replaceText(node, `${quote}${finalClasses}${quote}`);
 							},
 						},
@@ -101,7 +101,7 @@ const classNameRules: TSESLint.RuleModule<'flexOnly' | 'forbidden', []> = {
 					fix(fixer) {
 						const kept = classes.filter((cl) => !FORBIDDEN.has(cl));
 						const finalClasses = kept.join(' ');
-						const quote = raw.startsWith("'") ? "'" : '"';
+						const quote = (raw ?? '"').startsWith("'") ? "'" : '"';
 						return fixer.replaceText(node, `${quote}${finalClasses}${quote}`);
 					},
 				});
@@ -126,16 +126,13 @@ const classNameRules: TSESLint.RuleModule<'flexOnly' | 'forbidden', []> = {
 			},
 		};
 	},
-};
+});
 
-const plugin: TSESLint.FlatConfig.Plugin = {
+export default definePlugin({
 	meta: {
 		name: 'eslint-plugin-mahir-native-tailwind',
-		version: '1.0.0',
 	},
 	rules: {
 		'class-name-rules': classNameRules,
 	},
-};
-
-export default plugin;
+});

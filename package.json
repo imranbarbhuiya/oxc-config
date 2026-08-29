@@ -30,6 +30,64 @@
 		"dist"
 	],
 	"type": "module",
+	"typesVersions": {
+		"*": {
+			"api-error": [
+				"./dist/api-error.d.ts"
+			],
+			"central-icons": [
+				"./dist/central-icons.d.ts"
+			],
+			"common": [
+				"./dist/common.d.ts"
+			],
+			"edge": [
+				"./dist/edge.d.ts"
+			],
+			"i18n": [
+				"./dist/i18n.d.ts"
+			],
+			"jsdoc": [
+				"./dist/jsdoc.d.ts"
+			],
+			"jsx": [
+				"./dist/jsx.d.ts"
+			],
+			"module": [
+				"./dist/module.d.ts"
+			],
+			"native": [
+				"./dist/native.d.ts"
+			],
+			"native-tailwind": [
+				"./dist/native-tailwind.d.ts"
+			],
+			"nest": [
+				"./dist/nest.d.ts"
+			],
+			"next": [
+				"./dist/next.d.ts"
+			],
+			"node": [
+				"./dist/node.d.ts"
+			],
+			"react": [
+				"./dist/react.d.ts"
+			],
+			"tsdoc": [
+				"./dist/tsdoc.d.ts"
+			],
+			"typescript": [
+				"./dist/typescript.d.ts"
+			],
+			"tailwind": [
+				"./dist/tailwind.d.ts"
+			],
+			"oxfmt": [
+				"./dist/oxfmt.d.ts"
+			]
+		}
+	},
 	"exports": {
 		"./api-error": {
 			"types": "./dist/api-error.d.ts",
@@ -122,64 +180,6 @@
 			"default": "./dist/oxfmt.js"
 		}
 	},
-	"typesVersions": {
-		"*": {
-			"api-error": [
-				"./dist/api-error.d.ts"
-			],
-			"central-icons": [
-				"./dist/central-icons.d.ts"
-			],
-			"common": [
-				"./dist/common.d.ts"
-			],
-			"edge": [
-				"./dist/edge.d.ts"
-			],
-			"i18n": [
-				"./dist/i18n.d.ts"
-			],
-			"jsdoc": [
-				"./dist/jsdoc.d.ts"
-			],
-			"jsx": [
-				"./dist/jsx.d.ts"
-			],
-			"module": [
-				"./dist/module.d.ts"
-			],
-			"native": [
-				"./dist/native.d.ts"
-			],
-			"native-tailwind": [
-				"./dist/native-tailwind.d.ts"
-			],
-			"nest": [
-				"./dist/nest.d.ts"
-			],
-			"next": [
-				"./dist/next.d.ts"
-			],
-			"node": [
-				"./dist/node.d.ts"
-			],
-			"react": [
-				"./dist/react.d.ts"
-			],
-			"tsdoc": [
-				"./dist/tsdoc.d.ts"
-			],
-			"typescript": [
-				"./dist/typescript.d.ts"
-			],
-			"tailwind": [
-				"./dist/tailwind.d.ts"
-			],
-			"oxfmt": [
-				"./dist/oxfmt.d.ts"
-			]
-		}
-	},
 	"publishConfig": {
 		"access": "public"
 	},
@@ -194,8 +194,9 @@
 	},
 	"dependencies": {
 		"@clack/prompts": "^1.7.0",
+		"@oxlint/plugins": "1.80.0",
+		"eslint": "^10.9.1",
 		"eslint-plugin-better-tailwindcss": "^4.6.1",
-		"eslint-plugin-import-x": "^4.17.1",
 		"eslint-plugin-jsdoc": "^63.0.12",
 		"eslint-plugin-n": "^18.2.1",
 		"eslint-plugin-react": "^7.37.5",

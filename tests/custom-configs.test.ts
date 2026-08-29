@@ -1,7 +1,6 @@
+import { describe, expect, test } from 'bun:test';
 import { mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-
-import { describe, expect, test } from 'bun:test';
 
 import { runOxfmt, runOxlint, withOxfmtProject, withOxlintProject } from './test-support/cli.js';
 
@@ -78,14 +77,19 @@ describe('custom configs', () => {
 	});
 
 	test('typescript does not flag type-provided globals as undef', async () => {
-		await withOxlintProject(join(fixturesDirectory, 'tsdoc.ts'), 'typescript-globals.ts', ['typescript'], async (project) => {
-			await Bun.write(
-				project.file,
-				"describe('globals', () => {\n\ttest('jest', () => {\n\t\texpect(1).toBe(1);\n\t});\n});\n",
-			);
-			const result = await runOxlint(project);
-			expect(diagnostics(result.stdout).every(({ code }) => !code.includes('no-undef'))).toBeTrue();
-		});
+		await withOxlintProject(
+			join(fixturesDirectory, 'tsdoc.ts'),
+			'typescript-globals.ts',
+			['typescript'],
+			async (project) => {
+				await Bun.write(
+					project.file,
+					"describe('globals', () => {\n\ttest('jest', () => {\n\t\texpect(1).toBe(1);\n\t});\n});\n",
+				);
+				const result = await runOxlint(project);
+				expect(diagnostics(result.stdout).every(({ code }) => !code.includes('no-undef'))).toBeTrue();
+			},
+		);
 	});
 
 	test('tsdoc reports invalid parameter syntax', async () => {
@@ -150,12 +154,21 @@ describe('custom configs', () => {
 			expect(await readFile(project.file, 'utf8')).toBe(expected);
 		});
 
-		await withOxlintProject(join(fixturesDirectory, 'import-order.ts'), 'import-order.ts', ['common'], async (project) => {
-			await Bun.write(project.file, expected);
-			const result = await runOxlint(project);
-			expect(diagnostics(result.stdout).every(({ code }) => !code.includes('import-js/order') && !code.includes('import/order'))).toBeTrue();
-			expect(await readFile(project.file, 'utf8')).toBe(expected);
-		});
+		await withOxlintProject(
+			join(fixturesDirectory, 'import-order.ts'),
+			'import-order.ts',
+			['common'],
+			async (project) => {
+				await Bun.write(project.file, expected);
+				const result = await runOxlint(project);
+				expect(
+					diagnostics(result.stdout).every(
+						({ code }) => !code.includes('import-js/order') && !code.includes('import/order'),
+					),
+				).toBeTrue();
+				expect(await readFile(project.file, 'utf8')).toBe(expected);
+			},
+		);
 	});
 
 	test('arrow-body-style collapses as-needed returns and keeps other blocks', async () => {
@@ -217,14 +230,19 @@ describe('custom configs', () => {
 	});
 
 	test('node no-restricted-globals reports Buffer and process with node: messages', async () => {
-		await withOxlintProject(join(fixturesDirectory, 'node-globals.ts'), 'node-globals.ts', ['node'], async (project) => {
-			const result = await runOxlint(project);
-			expect(result.exitCode).toBe(1);
-			expectRule(result.stdout, 'no-restricted-globals');
-			const messages = diagnostics(result.stdout).map(({ message }) => message);
-			expect(messages.some((message) => message.includes('node:buffer'))).toBeTrue();
-			expect(messages.some((message) => message.includes('node:process'))).toBeTrue();
-		});
+		await withOxlintProject(
+			join(fixturesDirectory, 'node-globals.ts'),
+			'node-globals.ts',
+			['node'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(result.exitCode).toBe(1);
+				expectRule(result.stdout, 'no-restricted-globals');
+				const messages = diagnostics(result.stdout).map(({ message }) => message);
+				expect(messages.some((message) => message.includes('node:buffer'))).toBeTrue();
+				expect(messages.some((message) => message.includes('node:process'))).toBeTrue();
+			},
+		);
 	});
 
 	test('tailwind fixes unnecessary class whitespace', async () => {

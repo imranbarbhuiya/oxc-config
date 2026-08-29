@@ -1,6 +1,6 @@
 import { defineConfig } from 'oxlint';
 
-import { localPlugin, nativePlugins, packagePlugin } from './config.js';
+import { localPlugin, nativePlugins } from './config.js';
 
 import type { OxlintConfig } from 'oxlint';
 
@@ -36,18 +36,9 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'import/no-amd': 2,
 	'import/no-duplicates': 2,
 	'import/no-dynamic-require': 2,
-	'import-js/no-extraneous-dependencies': [
-		2,
-		{
-			devDependencies: true,
-			optionalDependencies: true,
-			peerDependencies: true,
-		},
-	],
 	'import/no-mutable-exports': 2,
 	'import/no-self-import': 2,
 	'import/no-webpack-loader-syntax': 2,
-	'import-js/order': 0,
 	'no-alert': 2,
 	'no-array-constructor': 2,
 	'no-async-promise-executor': 2,
@@ -286,10 +277,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 
 const config = defineConfig({
 	plugins: nativePlugins,
-	jsPlugins: [
-		localPlugin('mahir-restricted-syntax', './plugins/restricted-syntax.js'),
-		packagePlugin('import-js', 'eslint-plugin-import-x'),
-	],
+	jsPlugins: [localPlugin('mahir-restricted-syntax', './plugins/restricted-syntax.js')],
 	categories: {
 		correctness: 'off',
 	},

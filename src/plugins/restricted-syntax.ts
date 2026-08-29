@@ -1,4 +1,6 @@
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { definePlugin, defineRule } from '@oxlint/plugins';
+
+import type { ESTree } from '@oxlint/plugins';
 
 type Restriction =
 	| string
@@ -6,8 +8,6 @@ type Restriction =
 			message?: string;
 			selector: string;
 	  };
-
-type Options = Restriction[];
 
 function restrictionSelector(restriction: Restriction) {
 	return typeof restriction === 'string' ? restriction : restriction.selector;
@@ -18,7 +18,61 @@ function restrictionMessage(restriction: Restriction) {
 	return restriction.message ?? `Using '${restriction.selector}' is not allowed.`;
 }
 
-const noRestrictedSyntax: TSESLint.RuleModule<'restricted', Options> = {
+function isAstNode(value: unknown): value is ESTree.Node {
+	return typeof value === 'object' && value !== null && 'type' in value && typeof (value as { type: unknown }).type === 'string';
+}
+
+function pathValue(node: ESTree.Node, path: string) {
+	let current: unknown = node;
+	for (const part of path.split('.')) {
+		if (current == null || typeof current !== 'object') return undefined;
+		current = (current as Record<string, unknown>)[part];
+	}
+	return current;
+}
+
+function matchAttributes(node: ESTree.Node, attributes: string) {
+	for (const attribute of attributes.matchAll(/\[([^\]]+)\]/g)) {
+		const expression = attribute[1];
+		const equal = /^(.+?)=(?:'([^']*)'|"([^"]*)")$/.exec(expression);
+		if (!equal) return false;
+		if (String(pathValue(node, equal[1].trim())) !== (equal[2] ?? equal[3])) return false;
+	}
+	return true;
+}
+
+function matchSimple(node: ESTree.Node, simple: string) {
+	const type = /^(?<type>[A-Za-z]+)/.exec(simple)?.groups?.type;
+	if (!type || node.type !== type) return false;
+	const not = /:not\((?<inner>[^)]*)\)/.exec(simple);
+	if (not?.groups?.inner && matchAttributes(node, not.groups.inner)) return false;
+	return matchAttributes(node, simple.replace(/:not\([^)]*\)/g, ''));
+}
+
+function matchSelector(node: ESTree.Node, selector: string) {
+	const parts = selector.split(/\s*>\s*/);
+	let current: ESTree.Node | null | undefined = node;
+	for (let index = parts.length - 1; index >= 0; index--) {
+		if (!current || !matchSimple(current, parts[index] ?? '')) return false;
+		current = index > 0 ? current.parent : current;
+	}
+	return true;
+}
+
+function walk(node: ESTree.Node, visit: (current: ESTree.Node) => void, seen = new Set<ESTree.Node>()) {
+	if (seen.has(node)) return;
+	seen.add(node);
+	visit(node);
+	for (const key of Object.keys(node)) {
+		if (key === 'parent' || key === 'loc' || key === 'range') continue;
+		const child = (node as unknown as Record<string, unknown>)[key];
+		if (Array.isArray(child)) {
+			for (const item of child) if (isAstNode(item)) walk(item, visit, seen);
+		} else if (isAstNode(child)) walk(child, visit, seen);
+	}
+}
+
+const noRestrictedSyntax = defineRule({
 	meta: {
 		type: 'suggestion',
 		docs: {
@@ -45,32 +99,34 @@ const noRestrictedSyntax: TSESLint.RuleModule<'restricted', Options> = {
 			restricted: '{{message}}',
 		},
 	},
-	defaultOptions: [],
-	create(context) {
-		const visitors: TSESLint.RuleListener = {};
-		for (const restriction of context.options) {
-			const selector = restrictionSelector(restriction);
-			const message = restrictionMessage(restriction);
-			visitors[selector] = (node: TSESTree.Node) => {
-				context.report({
-					node,
-					messageId: 'restricted',
-					data: { message },
+	createOnce(context) {
+		let restrictions: Restriction[] = [];
+		return {
+			before() {
+				restrictions = Array.isArray(context.options) ? [...(context.options as Restriction[])] : [];
+				return restrictions.length > 0;
+			},
+			Program(program) {
+				walk(program, (node) => {
+					for (const restriction of restrictions) {
+						if (!matchSelector(node, restrictionSelector(restriction))) continue;
+						context.report({
+							node,
+							messageId: 'restricted',
+							data: { message: restrictionMessage(restriction) },
+						});
+					}
 				});
-			};
-		}
-		return visitors;
+			},
+		};
 	},
-};
+});
 
-const plugin: TSESLint.FlatConfig.Plugin = {
+export default definePlugin({
 	meta: {
 		name: 'eslint-plugin-mahir-restricted-syntax',
-		version: '1.0.0',
 	},
 	rules: {
 		'no-restricted-syntax': noRestrictedSyntax,
 	},
-};
-
-export default plugin;
+});

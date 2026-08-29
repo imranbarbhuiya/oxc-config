@@ -1,4 +1,4 @@
-import type { TSESLint } from '@typescript-eslint/utils';
+import { definePlugin, defineRule } from '@oxlint/plugins';
 
 const CENTRAL_ICONS_PACKAGE_RE = /^@central-icons-react(?:-native)?\/[^/]+$/;
 
@@ -7,7 +7,7 @@ function centralIconSubpath(iconName: string) {
 	return iconName;
 }
 
-const noCentralIconsBarrelImport: TSESLint.RuleModule<'barrelImport' | 'unsupportedImport', []> = {
+const noCentralIconsBarrelImport = defineRule({
 	meta: {
 		type: 'problem',
 		docs: {
@@ -15,7 +15,6 @@ const noCentralIconsBarrelImport: TSESLint.RuleModule<'barrelImport' | 'unsuppor
 				'Disallow barrel imports from @central-icons-react and @central-icons-react-native packages; use direct subpath imports instead',
 		},
 		fixable: 'code',
-		schema: [],
 		messages: {
 			barrelImport:
 				'Avoid barrel imports from `{{source}}`. Import icons directly from `{{source}}/<IconName>` to keep the bundler from opening thousands of icon files.',
@@ -23,8 +22,7 @@ const noCentralIconsBarrelImport: TSESLint.RuleModule<'barrelImport' | 'unsuppor
 				'Only named icon imports can be autofixed. Use direct subpath default imports from `{{source}}/<IconName>`.',
 		},
 	},
-	defaultOptions: [],
-	create(context) {
+	createOnce(context) {
 		return {
 			ImportDeclaration(node) {
 				const source = node.source.value;
@@ -45,7 +43,7 @@ const noCentralIconsBarrelImport: TSESLint.RuleModule<'barrelImport' | 'unsuppor
 					messageId: 'barrelImport',
 					data: { source },
 					fix(fixer) {
-						const quote = node.source.raw.startsWith("'") ? "'" : '"';
+						const quote = (node.source.raw ?? '"').startsWith("'") ? "'" : '"';
 						const fixedImports = namedSpecifiers.map((specifier) => {
 							const imported = specifier.imported;
 							const importedName = imported.type === 'Identifier' ? imported.name : imported.value;
@@ -60,16 +58,13 @@ const noCentralIconsBarrelImport: TSESLint.RuleModule<'barrelImport' | 'unsuppor
 			},
 		};
 	},
-};
+});
 
-const plugin: TSESLint.FlatConfig.Plugin = {
+export default definePlugin({
 	meta: {
 		name: 'eslint-plugin-mahir-central-icons',
-		version: '1.0.0',
 	},
 	rules: {
 		'no-central-icons-barrel-import': noCentralIconsBarrelImport,
 	},
-};
-
-export default plugin;
+});

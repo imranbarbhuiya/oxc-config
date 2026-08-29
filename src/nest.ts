@@ -5,12 +5,12 @@ import { localPlugin, nativePlugins } from './config.js';
 import type { OxlintConfig } from 'oxlint';
 
 const rules: NonNullable<OxlintConfig['rules']> = {
-	'nestjs-typed/sort-module-metadata-arrays': 2,
+	'mahir-nest/sort-module-metadata-arrays': 2,
 };
 
 const config = defineConfig({
 	plugins: nativePlugins,
-	jsPlugins: [localPlugin('nestjs-typed', './plugins/nest.js')],
+	jsPlugins: [localPlugin('mahir-nest', './plugins/nest.js')],
 	rules,
 });
 

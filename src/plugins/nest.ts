@@ -1,31 +1,20 @@
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { definePlugin, defineRule } from '@oxlint/plugins';
+
+import type { ESTree } from '@oxlint/plugins';
 
 const DEFAULT_LOCALE = 'en-US';
 
-type Options = [
-	{
-		locale?: string;
-	},
-];
-
-function isSortable(
-	node: TSESTree.Expression | TSESTree.SpreadElement | null,
-): node is TSESTree.CallExpression | TSESTree.Identifier {
+function isSortable(node: ESTree.ArrayExpressionElement): node is ESTree.CallExpression | ESTree.IdentifierName | ESTree.IdentifierReference {
 	return node?.type === 'Identifier' || node?.type === 'CallExpression';
 }
 
-function nodeName(node: TSESTree.Node) {
+function nodeName(node: ESTree.CallExpression | ESTree.IdentifierName | ESTree.IdentifierReference) {
 	if (node.type === 'Identifier') return node.name;
-	if (
-		node.type === 'CallExpression' &&
-		node.callee.type === 'MemberExpression' &&
-		node.callee.object.type === 'Identifier'
-	)
-		return node.callee.object.name;
+	if (node.callee.type === 'MemberExpression' && node.callee.object.type === 'Identifier') return node.callee.object.name;
 	return '';
 }
 
-function isFactoryProviderInjectArray(node: TSESTree.ArrayExpression) {
+function isFactoryProviderInjectArray(node: ESTree.ArrayExpression) {
 	if (node.parent.type !== 'Property') return false;
 	const property = node.parent;
 	if (property.key.type !== 'Identifier' || property.key.name !== 'inject') return false;
@@ -35,7 +24,7 @@ function isFactoryProviderInjectArray(node: TSESTree.ArrayExpression) {
 	);
 }
 
-const sortModuleMetadataArrays: TSESLint.RuleModule<'moduleMetadataArraysAreSorted', Options> = {
+const sortModuleMetadataArrays = defineRule({
 	meta: {
 		type: 'suggestion',
 		docs: {
@@ -54,20 +43,22 @@ const sortModuleMetadataArrays: TSESLint.RuleModule<'moduleMetadataArraysAreSort
 		messages: {
 			moduleMetadataArraysAreSorted: '`Module` metadata arrays should be sorted in ASC alphabetical order',
 		},
+		defaultOptions: [{ locale: DEFAULT_LOCALE }],
 	},
-	defaultOptions: [{ locale: DEFAULT_LOCALE }],
-	create(context) {
-		const locale = context.options.at(0)?.locale ?? DEFAULT_LOCALE;
-		const sourceCode = context.sourceCode;
+	createOnce(context) {
+		let locale = DEFAULT_LOCALE;
 		return {
-			'ClassDeclaration > Decorator[expression.callee.name="Module"] Property > ArrayExpression'(
-				node: TSESTree.ArrayExpression,
-			) {
+			before() {
+				const options = context.options[0] as { locale?: string } | undefined;
+				locale = options?.locale ?? DEFAULT_LOCALE;
+			},
+			'ClassDeclaration > Decorator[expression.callee.name="Module"] Property > ArrayExpression'(node) {
+				if (node.type !== 'ArrayExpression') return;
 				if (isFactoryProviderInjectArray(node)) return;
 				const sortable = node.elements.filter(isSortable);
 				const sorted = sortable.toSorted((left, right) => nodeName(left).localeCompare(nodeName(right), locale));
 				if (sortable.every((element, index) => element === sorted[index])) return;
-				const texts = sorted.map((element) => sourceCode.getText(element));
+				const texts = sorted.map((element) => context.sourceCode.getText(element));
 				context.report({
 					node,
 					messageId: 'moduleMetadataArraysAreSorted',
@@ -76,16 +67,13 @@ const sortModuleMetadataArrays: TSESLint.RuleModule<'moduleMetadataArraysAreSort
 			},
 		};
 	},
-};
+});
 
-const plugin: TSESLint.FlatConfig.Plugin = {
+export default definePlugin({
 	meta: {
 		name: 'eslint-plugin-mahir-nest',
-		version: '1.0.0',
 	},
 	rules: {
 		'sort-module-metadata-arrays': sortModuleMetadataArrays,
 	},
-};
-
-export default plugin;
+});
