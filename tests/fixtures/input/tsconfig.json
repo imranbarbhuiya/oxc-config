@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"jsx": "preserve",
+		"noEmit": true,
+		"strict": true,
+		"target": "esnext"
+	},
+	"include": ["**/*"]
+}

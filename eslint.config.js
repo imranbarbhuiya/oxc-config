@@ -9,7 +9,7 @@ export default [
 	...module,
 	...typescript,
 	{
-		ignores: ['dist/*', 'node_modules/*'],
+		ignores: ['dist/*', 'node_modules/*', 'tests/fixtures/input/**'],
 	},
 	{
 		rules: {

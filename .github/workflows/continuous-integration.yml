@@ -25,6 +25,8 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build
         run: bun run build
+      - name: Run Tests
+        run: bun test
       - name: Run ESLint
         run: bun lint --fix=false
       - name: Run Prettier

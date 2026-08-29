@@ -17,8 +17,10 @@
 		"lib": ["es2021"],
 		"outDir": "dist",
 		"noEmit": true,
+		"skipLibCheck": true,
 		"esModuleInterop": true,
 		"verbatimModuleSyntax": true
 	},
-	"includes": ["src/**/*.ts"]
+	"include": ["src/**/*.ts", "tests/**/*.ts"],
+	"exclude": ["tests/fixtures"]
 }
