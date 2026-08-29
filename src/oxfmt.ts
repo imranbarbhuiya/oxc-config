@@ -7,5 +7,5 @@ export default defineConfig({
 	quoteProps: 'as-needed',
 	trailingComma: 'all',
 	endOfLine: 'lf',
-	ignorePatterns: ['tests/fixtures/input'],
+	ignorePatterns: ['tests/fixtures/**'],
 });
