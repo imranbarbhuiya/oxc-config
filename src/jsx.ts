@@ -4,7 +4,6 @@ import type { TSESLint } from '@typescript-eslint/utils';
 
 const rules: TSESLint.FlatConfig.Rules = {
 	'react/jsx-boolean-value': [2, 'never'],
-	'react/jsx-child-element-spacing': 0,
 	'react/jsx-closing-bracket-location': [2, 'line-aligned'],
 	'react/jsx-closing-tag-location': 2,
 	'react/jsx-curly-brace-presence': [
@@ -15,7 +14,6 @@ const rules: TSESLint.FlatConfig.Rules = {
 		},
 	],
 	'react/jsx-equals-spacing': [2, 'never'],
-	'react/jsx-filename-extension': 0,
 	'react/jsx-first-prop-new-line': [2, 'multiline-multiprop'],
 	'react/jsx-fragments': [2, 'syntax'],
 	'react/jsx-key': [
@@ -25,7 +23,6 @@ const rules: TSESLint.FlatConfig.Rules = {
 			checkKeyMustBeforeSpread: true,
 		},
 	],
-	'react/jsx-max-depth': 0,
 	'react/jsx-max-props-per-line': [
 		2,
 		{
@@ -50,9 +47,7 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'react/jsx-no-comment-textnodes': 2,
 	'react/jsx-no-constructed-context-values': 2,
 	'react/jsx-no-duplicate-props': 2,
-	'react/jsx-no-literals': 0,
 	'react/jsx-no-script-url': 2,
-	'react/jsx-no-target-blank': 0,
 	'react/jsx-no-undef': 2,
 	'react/jsx-no-useless-fragment': [
 		2,
@@ -60,7 +55,6 @@ const rules: TSESLint.FlatConfig.Rules = {
 			allowExpressions: true,
 		},
 	],
-	'react/jsx-one-expression-per-line': 0,
 	'react/jsx-pascal-case': [
 		2,
 		{
@@ -68,7 +62,6 @@ const rules: TSESLint.FlatConfig.Rules = {
 		},
 	],
 	'react/jsx-props-no-multi-spaces': 2,
-	'react/jsx-props-no-spreading': 0,
 	'react/jsx-sort-props': 2,
 	'react/jsx-tag-spacing': [
 		2,
@@ -80,7 +73,6 @@ const rules: TSESLint.FlatConfig.Rules = {
 	],
 	'react/jsx-uses-react': 2,
 	'react/jsx-uses-vars': 2,
-	'react/jsx-wrap-multilines': 0,
 	'react/sort-default-props': 2,
 	'unicorn/consistent-function-scoping': 0,
 };

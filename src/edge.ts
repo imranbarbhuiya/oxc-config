@@ -1,7 +1,6 @@
 import type { TSESLint } from '@typescript-eslint/utils';
 
 const rules: TSESLint.FlatConfig.Rules = {
-	'import-x/extensions': 0,
 	'n/prefer-global/buffer': [2, 'always'],
 	'n/prefer-global/console': [2, 'always'],
 	'n/prefer-global/process': [2, 'always'],

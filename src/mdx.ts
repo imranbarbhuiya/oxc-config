@@ -16,9 +16,6 @@ const config: TSESLint.FlatConfig.ConfigArray = [
 		rules: {
 			'react/jsx-sort-props': 'off',
 			'@next/next/no-img-element': 'off',
-			'react/self-closing-comp': 'off',
-			'max-statements-per-line': 'off',
-			'react/jsx-indent': 'off',
 			'react/jsx-closing-bracket-location': 'off',
 		},
 	},
