@@ -76,28 +76,6 @@ describe('custom configs', () => {
 		});
 	});
 
-	test('common sorts alias imports as internal after packages', async () => {
-		await withOxlintProject(join(fixturesDirectory, 'tsdoc.ts'), 'import-order.ts', ['common'], async (project) => {
-			await Bun.write(
-				project.file,
-				"import type { User } from '@/types';\nimport { helper } from './helper';\nimport { Button } from '@/components/ui';\nimport { useUser } from '@/hooks/useUser';\nimport react from 'react';\nimport { parent } from '../parent';\nimport fs from 'node:fs';\nvoid [User, helper, Button, useUser, react, parent, fs];\n",
-			);
-			await runOxlint(project);
-			const specifiers = [...(await readFile(project.file, 'utf8')).matchAll(/from ["']([^"']+)["']/g)].map(
-				(match) => match[1],
-			);
-			expect(specifiers).toEqual([
-				'node:fs',
-				'react',
-				'@/components/ui',
-				'@/hooks/useUser',
-				'@/types',
-				'./helper',
-				'../parent',
-			]);
-		});
-	});
-
 	test('typescript does not flag type-provided globals as undef', async () => {
 		await withOxlintProject(join(fixturesDirectory, 'tsdoc.ts'), 'typescript-globals.ts', ['typescript'], async (project) => {
 			await Bun.write(

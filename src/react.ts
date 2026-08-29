@@ -64,6 +64,11 @@ const config = defineConfig({
 		browser: true,
 		serviceworker: true,
 	},
+	settings: {
+		react: {
+			version: '19.0.0',
+		},
+	},
 	rules,
 });
 
