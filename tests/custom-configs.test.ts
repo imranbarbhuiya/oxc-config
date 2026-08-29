@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'bun:test';
 
-import { runOxlint, withOxlintProject } from './test-support/cli.js';
+import { runOxfmt, runOxlint, withOxfmtProject, withOxlintProject } from './test-support/cli.js';
 
 const fixturesDirectory = join(import.meta.dir, 'fixtures/focused');
 
@@ -92,6 +92,68 @@ describe('custom configs', () => {
 			const result = await runOxlint(project);
 			expect(result.exitCode).toBe(0);
 			expectRule(result.stdout, 'syntax');
+		});
+	});
+
+	test('oxfmt sorts imports with aliases before relatives and types last', async () => {
+		const expected = [
+			'// @ts-nocheck',
+			'',
+			"import path from 'node:path';",
+			'',
+			"import { Platform } from 'react-native';",
+			"import { z } from 'zod';",
+			'',
+			"import { Input } from '@/components/ui/Input';",
+			"import { XP_IDS } from '@/utils/xpTaskIds';",
+			'',
+			"import { Footer } from './CollegeTaskFooter';",
+			"import { type FormProps } from './submission';",
+			"import { alertErrors } from './submission';",
+			"import { TaskIntroCard } from './TaskIntroCard';",
+			"import { COLLEGE_META } from './taskMeta';",
+			'',
+			"import { parentHelper } from '../helpers';",
+			'',
+			"import type { ParentType } from '../types';",
+			"import type { SubmitFields } from './submitTask';",
+			"import type { Theme } from '@/utils/theme';",
+			'',
+			'export function run(props: FormProps, theme: Theme, fields: SubmitFields, extra: ParentType) {',
+			'\treturn [',
+			'\t\tpath,',
+			'\t\tPlatform,',
+			'\t\tz,',
+			'\t\tInput,',
+			'\t\tXP_IDS,',
+			'\t\tFooter,',
+			'\t\talertErrors,',
+			'\t\tTaskIntroCard,',
+			'\t\tCOLLEGE_META,',
+			'\t\tparentHelper,',
+			'\t\tprops,',
+			'\t\ttheme,',
+			'\t\tfields,',
+			'\t\textra,',
+			'\t];',
+			'}',
+			'',
+		].join('\n');
+
+		await withOxfmtProject(join(fixturesDirectory, 'import-order.ts'), 'import-order.ts', async (project) => {
+			const first = await runOxfmt(project);
+			expect(first.exitCode).toBe(0);
+			expect(await readFile(project.file, 'utf8')).toBe(expected);
+			const second = await runOxfmt(project);
+			expect(second.exitCode).toBe(0);
+			expect(await readFile(project.file, 'utf8')).toBe(expected);
+		});
+
+		await withOxlintProject(join(fixturesDirectory, 'import-order.ts'), 'import-order.ts', ['common'], async (project) => {
+			await Bun.write(project.file, expected);
+			const result = await runOxlint(project);
+			expect(diagnostics(result.stdout).every(({ code }) => !code.includes('import-js/order') && !code.includes('import/order'))).toBeTrue();
+			expect(await readFile(project.file, 'utf8')).toBe(expected);
 		});
 	});
 

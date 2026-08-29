@@ -8,4 +8,15 @@ export default defineConfig({
 	trailingComma: 'all',
 	endOfLine: 'lf',
 	ignorePatterns: ['tests/fixtures/**'],
+	sortImports: {
+		groups: [
+			'value-builtin',
+			'value-index',
+			'value-external',
+			'value-internal',
+			'value-sibling',
+			'value-parent',
+			'type-import',
+		],
+	},
 });

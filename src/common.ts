@@ -49,17 +49,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'import/no-self-import': 2,
 	'import-js/no-useless-path-segments': 2,
 	'import/no-webpack-loader-syntax': 2,
-	'import-js/order': [
-		2,
-		{
-			alphabetize: {
-				caseInsensitive: true,
-				order: 'asc',
-			},
-			groups: ['builtin', 'index', 'external', 'internal', 'sibling', 'parent', 'type'],
-			'newlines-between': 'always',
-		},
-	],
+	'import-js/order': 0,
 	'no-alert': 2,
 	'no-array-constructor': 2,
 	'no-async-promise-executor': 2,
