@@ -13,6 +13,6 @@ export default defineConfig({
 	dts: true,
 	outExtensions: () => ({ js: '.js', dts: '.d.ts' }),
 	deps: {
-		skipNodeModulesBundle: true,
+		neverBundle: true,
 	},
 });

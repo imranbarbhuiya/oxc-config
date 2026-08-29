@@ -191,7 +191,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'unicorn/new-for-builtins': 2,
 	'unicorn/no-abusive-eslint-disable': 2,
 	'unicorn/no-array-for-each': 1,
-	'unicorn/no-array-method-this-argument': 2,
+	'unicorn/no-array-method-this-argument': 0,
 	'unicorn/no-await-in-promise-methods': 2,
 	'unicorn/no-document-cookie': 2,
 	'unicorn/no-empty-file': 2,

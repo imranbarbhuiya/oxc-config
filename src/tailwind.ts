@@ -4,17 +4,16 @@ import { nativePlugins, packagePlugin } from './config.js';
 
 const config = defineConfig({
 	plugins: nativePlugins,
-	jsPlugins: [packagePlugin('better-tailwindcss-js', 'eslint-plugin-better-tailwindcss')],
+	jsPlugins: [packagePlugin('tailwindcss', 'oxlint-tailwindcss')],
 	settings: {
-		'better-tailwindcss': {
+		tailwindcss: {
 			entryPoint: 'app/globals.css',
 		},
 	},
 	rules: {
-		'better-tailwindcss-js/enforce-consistent-class-order': 'warn',
-		'better-tailwindcss-js/no-unnecessary-whitespace': 'warn',
-		'better-tailwindcss-js/enforce-canonical-classes': 'warn',
-		'better-tailwindcss-js/no-unknown-classes': 'error',
+		'tailwindcss/enforce-sort-order': 'warn',
+		'tailwindcss/no-unnecessary-whitespace': 'warn',
+		'tailwindcss/enforce-canonical': 'warn',
 	},
 });
 

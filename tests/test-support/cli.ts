@@ -78,6 +78,10 @@ export async function withOxlintProject<T>(
 ): Promise<T> {
 	const project = await createProject(source, relativeFile);
 	try {
+		if (configs.includes('tailwind')) {
+			await mkdir(join(project.directory, 'app'), { recursive: true });
+			await Bun.write(join(project.directory, 'app/globals.css'), '@import "tailwindcss";\n');
+		}
 		await writeOxlintConfig(project.directory, configs, extra);
 		return await callback(project);
 	} finally {
