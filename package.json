@@ -1,6 +1,6 @@
 {
 	"name": "@imranbarbhuiya/oxc-config",
-	"version": "0.1.8",
+	"version": "0.1.9",
 	"description": "Shared Oxlint and Oxfmt configs for JavaScript and TypeScript projects",
 	"keywords": [
 		"config",
