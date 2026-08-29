@@ -76,6 +76,17 @@ describe('custom configs', () => {
 		});
 	});
 
+	test('typescript does not flag type-provided globals as undef', async () => {
+		await withOxlintProject(join(fixturesDirectory, 'tsdoc.ts'), 'typescript-globals.ts', ['typescript'], async (project) => {
+			await Bun.write(
+				project.file,
+				"describe('globals', () => {\n\ttest('jest', () => {\n\t\texpect(1).toBe(1);\n\t});\n});\n",
+			);
+			const result = await runOxlint(project);
+			expect(diagnostics(result.stdout).every(({ code }) => !code.includes('no-undef'))).toBeTrue();
+		});
+	});
+
 	test('tsdoc reports invalid parameter syntax', async () => {
 		await withOxlintProject(join(fixturesDirectory, 'tsdoc.ts'), 'tsdoc.ts', ['tsdoc'], async (project) => {
 			const result = await runOxlint(project);
