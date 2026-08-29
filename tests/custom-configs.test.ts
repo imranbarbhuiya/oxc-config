@@ -71,8 +71,8 @@ describe('custom configs', () => {
 		await withOxlintProject(join(fixturesDirectory, 'nest.ts'), 'nest.ts', ['nest'], async (project) => {
 			const result = await runOxlint(project);
 			expect(result.exitCode).toBe(0);
-			expect(await readFile(project.file, 'utf8')).toContain('imports: [AlphaModule, ZuluModule]');
-			expect(await readFile(project.file, 'utf8')).toContain('providers: [AlphaService, ZuluService]');
+			expect(await readFile(project.file, 'utf8')).toContain('imports: [AlphaModule, MidModule, ZuluModule]');
+			expect(await readFile(project.file, 'utf8')).toContain('providers: [AlphaService, MidService, ZuluService]');
 		});
 	});
 

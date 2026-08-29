@@ -14,7 +14,7 @@
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"moduleResolution": "bundler",
-		"lib": ["es2021"],
+		"lib": ["es2023"],
 		"outDir": "dist",
 		"noEmit": true,
 		"skipLibCheck": true,

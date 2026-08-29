@@ -10,7 +10,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 
 const config = defineConfig({
 	plugins: nativePlugins,
-	jsPlugins: [localPlugin('nestjs-typed', './nest-plugin.js')],
+	jsPlugins: [localPlugin('nestjs-typed', './plugins/nest.js')],
 	rules,
 });
 
