@@ -1,33 +1,34 @@
-import n from 'eslint-plugin-n';
-import globals from 'globals';
+import { defineConfig } from 'oxlint';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import { nativePlugins, packagePlugin } from './config.js';
 
-const rules: TSESLint.FlatConfig.Rules = {
-	'n/callback-return': 2,
-	'n/handle-callback-err': 2,
-	'n/no-callback-literal': 2,
-	'n/no-deprecated-api': 2,
-	'n/no-exports-assign': 2,
-	'n/no-new-require': 2,
-	'n/no-path-concat': 2,
-	'n/no-sync': [
+import type { OxlintConfig } from 'oxlint';
+
+const rules: NonNullable<OxlintConfig['rules']> = {
+	'node/callback-return': 2,
+	'node/handle-callback-err': 2,
+	'node-js/no-callback-literal': 2,
+	'node-js/no-deprecated-api': 2,
+	'node/no-exports-assign': 2,
+	'node/no-new-require': 2,
+	'node/no-path-concat': 2,
+	'node/no-sync': [
 		2,
 		{
 			allowAtRootLevel: true,
 			ignores: ['existsSync'],
 		},
 	],
-	'n/no-unpublished-bin': 2,
-	'n/prefer-global/buffer': [2, 'never'],
-	'n/prefer-global/console': [2, 'always'],
-	'n/prefer-global/process': [2, 'never'],
-	'n/prefer-global/text-decoder': [2, 'never'],
-	'n/prefer-global/text-encoder': [2, 'never'],
-	'n/prefer-global/url': [2, 'never'],
-	'n/prefer-global/url-search-params': [2, 'never'],
-	'n/process-exit-as-throw': 2,
-	'n/hashbang': [
+	'node-js/no-unpublished-bin': 2,
+	'node-js/prefer-global/buffer': [2, 'never'],
+	'node-js/prefer-global/console': [2, 'always'],
+	'node-js/prefer-global/process': [2, 'never'],
+	'node-js/prefer-global/text-decoder': [2, 'never'],
+	'node-js/prefer-global/text-encoder': [2, 'never'],
+	'node-js/prefer-global/url': [2, 'never'],
+	'node-js/prefer-global/url-search-params': [2, 'never'],
+	'node-js/process-exit-as-throw': 2,
+	'node-js/hashbang': [
 		2,
 		{
 			convertPath: {
@@ -50,25 +51,13 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'unicorn/require-post-message-target-origin': 0,
 };
 
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/node',
-		languageOptions: {
-			globals: {
-				...n.configs['recommended-module'].globals,
-				...globals.node,
-			},
-			parserOptions: {
-				ecmaFeatures: {
-					globalReturn: true,
-				},
-			},
-		},
-		plugins: {
-			n,
-		},
-		rules,
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [packagePlugin('node-js', 'eslint-plugin-n')],
+	env: {
+		node: true,
 	},
-];
+	rules,
+});
 
 export default config;

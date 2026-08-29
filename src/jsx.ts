@@ -1,42 +1,47 @@
-import eslintPluginReact from 'eslint-plugin-react';
+import { defineConfig } from 'oxlint';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import { nativePlugins, packagePlugin } from './config.js';
 
-const rules: TSESLint.FlatConfig.Rules = {
-	'react/jsx-boolean-value': [2, 'never'],
-	'react/jsx-closing-bracket-location': [2, 'line-aligned'],
-	'react/jsx-closing-tag-location': 2,
-	'react/jsx-curly-brace-presence': [
+import type { OxlintConfig } from 'oxlint';
+
+const rules: NonNullable<OxlintConfig['rules']> = {
+	'react/jsx-boolean-value': 0,
+	'react-js/jsx-boolean-value': [2, 'never'],
+	'react-js/jsx-closing-bracket-location': [2, 'line-aligned'],
+	'react-js/jsx-closing-tag-location': 2,
+	'react/jsx-curly-brace-presence': 0,
+	'react-js/jsx-curly-brace-presence': [
 		2,
 		{
 			children: 'never',
 			props: 'never',
 		},
 	],
-	'react/jsx-equals-spacing': [2, 'never'],
-	'react/jsx-first-prop-new-line': [2, 'multiline-multiprop'],
+	'react-js/jsx-equals-spacing': [2, 'never'],
+	'react-js/jsx-first-prop-new-line': [2, 'multiline-multiprop'],
 	'react/jsx-fragments': [2, 'syntax'],
 	'react/jsx-key': [
 		2,
 		{
 			checkFragmentShorthand: true,
 			checkKeyMustBeforeSpread: true,
+			warnOnDuplicates: false,
 		},
 	],
-	'react/jsx-max-props-per-line': [
+	'react-js/jsx-max-props-per-line': [
 		2,
 		{
 			maximum: 3,
 			when: 'multiline',
 		},
 	],
-	'react/jsx-newline': [
+	'react-js/jsx-newline': [
 		2,
 		{
 			prevent: true,
 		},
 	],
-	'react/jsx-no-bind': [
+	'react-js/jsx-no-bind': [
 		2,
 		{
 			allowArrowFunctions: true,
@@ -61,9 +66,8 @@ const rules: TSESLint.FlatConfig.Rules = {
 			ignore: ['h{}', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'ul', 'ol', 'li', 'img', 'div', 'span', 'dl', 'dt', 'dd'],
 		},
 	],
-	'react/jsx-props-no-multi-spaces': 2,
-	'react/jsx-sort-props': 2,
-	'react/jsx-tag-spacing': [
+	'react-js/jsx-sort-props': 2,
+	'react-js/jsx-tag-spacing': [
 		2,
 		{
 			afterOpening: 'never',
@@ -71,47 +75,16 @@ const rules: TSESLint.FlatConfig.Rules = {
 			closingSlash: 'never',
 		},
 	],
-	'react/jsx-uses-react': 2,
-	'react/jsx-uses-vars': 2,
-	'react/sort-default-props': 2,
+	'react-js/jsx-uses-react': 2,
+	'react-js/jsx-uses-vars': 2,
+	'react-js/sort-default-props': 2,
 	'unicorn/consistent-function-scoping': 0,
 };
 
-// parserOptions: {
-// 	ecmaFeatures: {
-// 		jsx: true,
-// 		impliedStrict: true,
-// 	},
-// 	sourceType: 'module',
-// },
-// plugins: ['react'],
-// rules: {
-
-const settings: TSESLint.FlatConfig.Settings = {
-	'import-x/extensions': ['.js', '.jsx'],
-	'import-x/resolver': {
-		node: {
-			extensions: ['.js', '.jsx'],
-		},
-	},
-};
-
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/jsx',
-		languageOptions: {
-			parserOptions: {
-				ecmaFeatures: {
-					jsx: true,
-				},
-			},
-		},
-		plugins: {
-			react: eslintPluginReact,
-		},
-		rules,
-		settings,
-	},
-];
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [packagePlugin('react-js', 'eslint-plugin-react')],
+	rules,
+});
 
 export default config;

@@ -1,20 +1,19 @@
-import process from 'node:process';
+import { defineConfig } from 'oxlint';
 
-import eslintPluginSonarjs from 'eslint-plugin-sonarjs';
-import tseslint from 'typescript-eslint';
+import { nativePlugins, packagePlugin } from './config.js';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import type { OxlintConfig } from 'oxlint';
 
-const rules: TSESLint.FlatConfig.Rules = {
-	'@typescript-eslint/adjacent-overload-signatures': 2,
-	'@typescript-eslint/array-type': [
+const rules: NonNullable<OxlintConfig['rules']> = {
+	'typescript/adjacent-overload-signatures': 2,
+	'typescript/array-type': [
 		2,
 		{
 			default: 'array',
 		},
 	],
-	'@typescript-eslint/await-thenable': 2,
-	'@typescript-eslint/ban-ts-comment': [
+	'typescript/await-thenable': 2,
+	'typescript/ban-ts-comment': [
 		2,
 		{
 			'ts-check': true,
@@ -23,24 +22,24 @@ const rules: TSESLint.FlatConfig.Rules = {
 			'ts-nocheck': false,
 		},
 	],
-	'@typescript-eslint/ban-tslint-comment': 2,
-	'@typescript-eslint/class-literal-property-style': [2, 'fields'],
-	'@typescript-eslint/consistent-type-assertions': [
+	'typescript/ban-tslint-comment': 2,
+	'typescript/class-literal-property-style': [2, 'fields'],
+	'typescript/consistent-type-assertions': [
 		2,
 		{
 			assertionStyle: 'as',
 			objectLiteralTypeAssertions: 'allow',
 		},
 	],
-	'@typescript-eslint/consistent-type-definitions': 2,
-	'@typescript-eslint/consistent-type-exports': [
+	'typescript/consistent-type-definitions': 2,
+	'typescript/consistent-type-exports': [
 		2,
 		{
 			fixMixedExportsWithInlineTypeSpecifier: true,
 		},
 	],
-	'@typescript-eslint/default-param-last': 2,
-	'@typescript-eslint/dot-notation': [
+	'typescript-js/default-param-last': 2,
+	'typescript/dot-notation': [
 		2,
 		{
 			allowKeywords: true,
@@ -48,101 +47,101 @@ const rules: TSESLint.FlatConfig.Rules = {
 			allowPrivateClassPropertyAccess: true,
 		},
 	],
-	'@typescript-eslint/method-signature-style': [2, 'property'],
-	'@typescript-eslint/no-array-constructor': 2,
-	'@typescript-eslint/no-array-delete': 0,
-	'@typescript-eslint/no-base-to-string': [
+	'typescript-js/method-signature-style': [2, 'property'],
+	'typescript-js/no-array-constructor': 2,
+	'typescript/no-array-delete': 0,
+	'typescript/no-base-to-string': [
 		1,
 		{
 			ignoredTypeNames: ['RegExp'],
 		},
 	],
-	'@typescript-eslint/no-confusing-non-null-assertion': 2,
-	'@typescript-eslint/no-dupe-class-members': 2,
-	'@typescript-eslint/no-duplicate-enum-values': 2,
-	'@typescript-eslint/no-duplicate-type-constituents': 2,
-	'@typescript-eslint/no-dynamic-delete': 1,
-	'@typescript-eslint/no-empty-object-type': [
+	'typescript/no-confusing-non-null-assertion': 2,
+	'typescript-js/no-dupe-class-members': 2,
+	'typescript/no-duplicate-enum-values': 2,
+	'typescript/no-duplicate-type-constituents': 2,
+	'typescript/no-dynamic-delete': 1,
+	'typescript/no-empty-object-type': [
 		2,
 		{
 			allowInterfaces: 'with-single-extends',
 			allowObjectTypes: 'always',
 		},
 	],
-	'@typescript-eslint/no-explicit-any': 0,
-	'@typescript-eslint/no-extra-non-null-assertion': 2,
-	'@typescript-eslint/no-floating-promises': [
+	'typescript/no-explicit-any': 0,
+	'typescript/no-extra-non-null-assertion': 2,
+	'typescript/no-floating-promises': [
 		2,
 		{
 			ignoreIIFE: true,
 			ignoreVoid: true,
 		},
 	],
-	'@typescript-eslint/no-for-in-array': 2,
-	'@typescript-eslint/no-implied-eval': 2,
-	'@typescript-eslint/no-inferrable-types': [
+	'typescript/no-for-in-array': 2,
+	'typescript/no-implied-eval': 2,
+	'typescript/no-inferrable-types': [
 		2,
 		{
 			ignoreParameters: true,
 			ignoreProperties: true,
 		},
 	],
-	'@typescript-eslint/no-invalid-this': 2,
-	'@typescript-eslint/no-invalid-void-type': [
+	'typescript-js/no-invalid-this': 2,
+	'typescript/no-invalid-void-type': [
 		2,
 		{
 			allowAsThisParameter: true,
 			allowInGenericTypeArguments: true,
 		},
 	],
-	'@typescript-eslint/no-meaningless-void-operator': [
+	'typescript/no-meaningless-void-operator': [
 		2,
 		{
 			checkNever: true,
 		},
 	],
-	'@typescript-eslint/no-misused-new': 2,
-	'@typescript-eslint/no-misused-promises': [
+	'typescript/no-misused-new': 2,
+	'typescript/no-misused-promises': [
 		2,
 		{
 			checksConditionals: true,
 			checksVoidReturn: false,
 		},
 	],
-	'@typescript-eslint/no-namespace': 0,
-	'@typescript-eslint/no-non-null-asserted-nullish-coalescing': 2,
-	'@typescript-eslint/no-non-null-asserted-optional-chain': 2,
-	'@typescript-eslint/no-redeclare': [
+	'typescript/no-namespace': 0,
+	'typescript/no-non-null-asserted-nullish-coalescing': 2,
+	'typescript/no-non-null-asserted-optional-chain': 2,
+	'typescript-js/no-redeclare': [
 		2,
 		{
 			builtinGlobals: true,
 		},
 	],
-	'@typescript-eslint/no-redundant-type-constituents': 0,
-	'@typescript-eslint/no-require-imports': 2,
-	'@typescript-eslint/no-this-alias': [
+	'typescript/no-redundant-type-constituents': 0,
+	'typescript/no-require-imports': 2,
+	'typescript/no-this-alias': [
 		2,
 		{
 			allowDestructuring: true,
 			allowedNames: ['self'],
 		},
 	],
-	'@typescript-eslint/no-unnecessary-boolean-literal-compare': 2,
-	'@typescript-eslint/no-unnecessary-condition': 1,
-	'@typescript-eslint/no-unnecessary-qualifier': 2,
-	'@typescript-eslint/no-unnecessary-type-assertion': 2,
-	'@typescript-eslint/no-unnecessary-type-constraint': 2,
-	'@typescript-eslint/no-unsafe-argument': 0,
-	'@typescript-eslint/no-unsafe-assignment': 0,
-	'@typescript-eslint/no-unsafe-call': 0,
-	'@typescript-eslint/no-unsafe-enum-comparison': 0,
-	'@typescript-eslint/no-unsafe-function-type': 0,
-	'@typescript-eslint/no-unsafe-member-access': 0,
-	'@typescript-eslint/no-unsafe-return': 0,
-	'@typescript-eslint/no-unsafe-unary-minus': 0,
-	'@typescript-eslint/no-unused-expressions': 2,
-	'@typescript-eslint/no-unused-vars': 0,
-	'@typescript-eslint/no-use-before-define': [
+	'typescript/no-unnecessary-boolean-literal-compare': 2,
+	'typescript/no-unnecessary-condition': 1,
+	'typescript/no-unnecessary-qualifier': 2,
+	'typescript/no-unnecessary-type-assertion': 2,
+	'typescript/no-unnecessary-type-constraint': 2,
+	'typescript/no-unsafe-argument': 0,
+	'typescript/no-unsafe-assignment': 0,
+	'typescript/no-unsafe-call': 0,
+	'typescript/no-unsafe-enum-comparison': 0,
+	'typescript/no-unsafe-function-type': 0,
+	'typescript/no-unsafe-member-access': 0,
+	'typescript/no-unsafe-return': 0,
+	'typescript/no-unsafe-unary-minus': 0,
+	'typescript-js/no-unused-expressions': 2,
+	'typescript/no-unused-vars': 0,
+	'typescript-js/no-use-before-define': [
 		2,
 		{
 			classes: true,
@@ -150,36 +149,37 @@ const rules: TSESLint.FlatConfig.Rules = {
 			variables: true,
 		},
 	],
-	'@typescript-eslint/no-useless-constructor': 2,
-	'@typescript-eslint/only-throw-error': 2,
-	'@typescript-eslint/prefer-as-const': 2,
-	'@typescript-eslint/prefer-for-of': 2,
-	'@typescript-eslint/prefer-function-type': 2,
-	'@typescript-eslint/prefer-includes': 2,
-	'@typescript-eslint/prefer-literal-enum-member': 2,
-	'@typescript-eslint/prefer-namespace-keyword': 2,
-	'@typescript-eslint/prefer-optional-chain': 2,
-	'@typescript-eslint/prefer-readonly': [
+	'typescript-js/no-useless-constructor': 2,
+	'typescript/only-throw-error': 2,
+	'typescript/prefer-as-const': 0,
+	'typescript-js/prefer-as-const': 0,
+	'typescript/prefer-for-of': 2,
+	'typescript/prefer-function-type': 2,
+	'typescript/prefer-includes': 2,
+	'typescript/prefer-literal-enum-member': 2,
+	'typescript/prefer-namespace-keyword': 2,
+	'typescript/prefer-optional-chain': 2,
+	'typescript/prefer-readonly': [
 		2,
 		{
 			onlyInlineLambdas: true,
 		},
 	],
-	'@typescript-eslint/prefer-reduce-type-parameter': 2,
-	'@typescript-eslint/prefer-regexp-exec': 2,
-	'@typescript-eslint/prefer-return-this-type': 2,
-	'@typescript-eslint/prefer-string-starts-ends-with': 2,
-	'@typescript-eslint/require-array-sort-compare': [
+	'typescript/prefer-reduce-type-parameter': 2,
+	'typescript/prefer-regexp-exec': 2,
+	'typescript/prefer-return-this-type': 2,
+	'typescript/prefer-string-starts-ends-with': 2,
+	'typescript/require-array-sort-compare': [
 		2,
 		{
 			ignoreStringArrays: false,
 		},
 	],
-	'@typescript-eslint/require-await': 0,
-	'@typescript-eslint/restrict-plus-operands': 2,
-	'@typescript-eslint/restrict-template-expressions': 0,
-	'@typescript-eslint/return-await': [2, 'in-try-catch'],
-	'@typescript-eslint/triple-slash-reference': [
+	'typescript/require-await': 0,
+	'typescript/restrict-plus-operands': 2,
+	'typescript/restrict-template-expressions': 0,
+	'typescript/return-await': [2, 'in-try-catch'],
+	'typescript/triple-slash-reference': [
 		2,
 		{
 			lib: 'never',
@@ -187,14 +187,14 @@ const rules: TSESLint.FlatConfig.Rules = {
 			types: 'never',
 		},
 	],
-	'@typescript-eslint/unbound-method': 0,
-	'@typescript-eslint/unified-signatures': 2,
+	'typescript/unbound-method': 0,
+	'typescript/unified-signatures': 2,
 	'consistent-return': 0,
 	'default-case': 0,
 	'default-case-last': 0,
 	'default-param-last': 0,
 	'dot-notation': 0,
-	'import-x/no-dynamic-require': 0,
+	'import/no-dynamic-require': 0,
 	'no-shadow': 0,
 	'no-use-before-define': 0,
 	'no-useless-constructor': 0,
@@ -223,36 +223,13 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'sonarjs/prefer-single-boolean-return': 2,
 	'sonarjs/prefer-while': 2,
 };
-const settings: TSESLint.FlatConfig.Settings = {
-	'import-x/parsers': {
-		'@typescript-eslint/parser': ['.ts', '.tsx', '.cts', '.mts'],
-	},
-	'import-x/external-module-folders': ['node_modules', 'node_modules/@types'],
-	'import-x/extensions': ['.ts', '.tsx', '.cts', '.mts', '.js', '.jsx'],
-	'import-x/resolver': {
-		typescript: {
-			alwaysTryTypes: true,
-			project: ['./tsconfig.json', './tsconfig.eslint.json'],
-		},
-		node: {
-			extensions: ['.ts', '.tsx', '.cts', '.mts', '.js', '.jsx'],
-		},
-	},
-};
-
-const config: TSESLint.FlatConfig.ConfigArray = tseslint.config(...tseslint.configs.recommendedTypeChecked, {
-	name: 'mahir/typescript',
-	plugins: {
-		sonarjs: eslintPluginSonarjs,
-	},
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [
+		packagePlugin('sonarjs', 'eslint-plugin-sonarjs'),
+		packagePlugin('typescript-js', '@typescript-eslint/eslint-plugin'),
+	],
 	rules,
-	settings,
-	languageOptions: {
-		parserOptions: {
-			projectService: true,
-			tsconfigRootDir: process.cwd(),
-		},
-	},
 });
 
 export default config;

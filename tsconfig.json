@@ -21,6 +21,6 @@
 		"esModuleInterop": true,
 		"verbatimModuleSyntax": true
 	},
-	"include": ["src/**/*.ts", "tests/**/*.ts"],
+	"include": ["src/**/*.ts", "tests/**/*.ts", "oxlint.config.ts", "oxfmt.config.ts"],
 	"exclude": ["tests/fixtures"]
 }

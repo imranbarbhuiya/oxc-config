@@ -1,32 +1,27 @@
-import eslintPluginTsdoc from 'eslint-plugin-tsdoc';
+import { defineConfig } from 'oxlint';
 
+import { nativePlugins, packagePlugin } from './config.js';
 import jsdoc from './jsdoc.js';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import type { OxlintConfig } from 'oxlint';
 
-const rules: TSESLint.FlatConfig.Rules = {
+const rules: NonNullable<OxlintConfig['rules']> = {
 	'jsdoc/check-tag-names': 0,
 	'jsdoc/require-property-type': 0,
-	'jsdoc/no-undefined-types': 0,
-	'tsdoc/syntax': 1,
+	'jsdoc-js/no-undefined-types': 0,
+	'tsdoc-js/syntax': 1,
 };
 
-const settings: TSESLint.FlatConfig.Settings = {
-	jsdoc: {
-		mode: 'typescript',
-	},
-};
-
-const config: TSESLint.FlatConfig.ConfigArray = [
-	...jsdoc,
-	{
-		name: 'mahir/tsdoc',
-		plugins: {
-			tsdoc: eslintPluginTsdoc,
+const config = defineConfig({
+	extends: [jsdoc],
+	plugins: nativePlugins,
+	jsPlugins: [packagePlugin('tsdoc-js', 'eslint-plugin-tsdoc')],
+	rules,
+	settings: {
+		jsdoc: {
+			mode: 'typescript',
 		},
-		rules,
-		settings,
 	},
-];
+});
 
 export default config;

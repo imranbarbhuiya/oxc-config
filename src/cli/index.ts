@@ -8,88 +8,9 @@ import * as p from '@clack/prompts';
 import { addDevDependency, detectPackageManager } from 'nypm';
 
 interface PresetConfig {
-	imports: string[];
 	configs: string[];
 	description: string;
 }
-
-const PRESETS: Record<string, PresetConfig> = {
-	nextjs: {
-		imports: [
-			"import common from 'eslint-config-mahir/common';",
-			"import edge from 'eslint-config-mahir/edge';",
-			"import module from 'eslint-config-mahir/module';",
-			"import next from 'eslint-config-mahir/next';",
-			"import node from 'eslint-config-mahir/node';",
-			"import react from 'eslint-config-mahir/react';",
-			"import typescript from 'eslint-config-mahir/typescript';",
-		],
-		configs: ['common', 'node', 'typescript', 'module', 'react', 'next', 'edge'],
-		description: 'Next.js application with React, TypeScript, and edge runtime support',
-	},
-	react: {
-		imports: [
-			"import common from 'eslint-config-mahir/common';",
-			"import module from 'eslint-config-mahir/module';",
-			"import node from 'eslint-config-mahir/node';",
-			"import react from 'eslint-config-mahir/react';",
-			"import typescript from 'eslint-config-mahir/typescript';",
-		],
-		configs: ['common', 'node', 'typescript', 'module', 'react'],
-		description: 'React application with TypeScript',
-	},
-	node: {
-		imports: [
-			"import common from 'eslint-config-mahir/common';",
-			"import module from 'eslint-config-mahir/module';",
-			"import node from 'eslint-config-mahir/node';",
-			"import typescript from 'eslint-config-mahir/typescript';",
-		],
-		configs: ['common', 'node', 'typescript', 'module'],
-		description: 'Node.js application with TypeScript',
-	},
-	native: {
-		imports: [
-			"import common from 'eslint-config-mahir/common';",
-			"import module from 'eslint-config-mahir/module';",
-			"import native from 'eslint-config-mahir/native';",
-			"import node from 'eslint-config-mahir/node';",
-			"import react from 'eslint-config-mahir/react';",
-			"import typescript from 'eslint-config-mahir/typescript';",
-		],
-		configs: ['common', 'node', 'typescript', 'module', 'react', 'native'],
-		description: 'React Native application with TypeScript',
-	},
-	library: {
-		imports: [
-			"import common from 'eslint-config-mahir/common';",
-			"import module from 'eslint-config-mahir/module';",
-			"import node from 'eslint-config-mahir/node';",
-			"import tsdoc from 'eslint-config-mahir/tsdoc';",
-			"import typescript from 'eslint-config-mahir/typescript';",
-		],
-		configs: ['common', 'node', 'typescript', 'module', 'tsdoc'],
-		description: 'TypeScript library with TSDoc support',
-	},
-	nest: {
-		imports: [
-			"import common from 'eslint-config-mahir/common';",
-			"import module from 'eslint-config-mahir/module';",
-			"import nest from 'eslint-config-mahir/nest';",
-			"import node from 'eslint-config-mahir/node';",
-			"import typescript from 'eslint-config-mahir/typescript';",
-		],
-		configs: ['common', 'node', 'typescript', 'module', 'nest'],
-		description: 'NestJS application with TypeScript',
-	},
-};
-
-const TAILWIND_IMPORT = "import tailwind from 'eslint-config-mahir/tailwind';";
-const I18N_IMPORT = "import i18n from 'eslint-config-mahir/i18n';";
-const NATIVE_TAILWIND_IMPORT = "import nativeTailwind from 'eslint-config-mahir/native-tailwind';";
-const CENTRAL_ICONS_IMPORT = "import centralIcons from 'eslint-config-mahir/central-icons';";
-const API_ERROR_IMPORT = "import apiError from 'eslint-config-mahir/api-error';";
-const QUERY_IMPORT = "import query from '@tanstack/eslint-plugin-query';";
 
 interface ExtraConfigs {
 	apiError: boolean;
@@ -99,22 +20,42 @@ interface ExtraConfigs {
 	query: boolean;
 }
 
-const PRETTIER_CONFIG = {
-	printWidth: 120,
-	useTabs: true,
-	singleQuote: true,
-	quoteProps: 'as-needed',
-	trailingComma: 'all',
-	endOfLine: 'lf',
+const PACKAGE_NAME = '@imranbarbhuiya/oxc-config';
+
+const PRESETS: Record<string, PresetConfig> = {
+	nextjs: {
+		configs: ['common', 'node', 'typescript', 'module', 'react', 'next', 'edge'],
+		description: 'Next.js application with React, TypeScript, and edge runtime support',
+	},
+	react: {
+		configs: ['common', 'node', 'typescript', 'module', 'react'],
+		description: 'React application with TypeScript',
+	},
+	node: {
+		configs: ['common', 'node', 'typescript', 'module'],
+		description: 'Node.js application with TypeScript',
+	},
+	native: {
+		configs: ['common', 'node', 'typescript', 'module', 'react', 'native'],
+		description: 'React Native application with TypeScript',
+	},
+	library: {
+		configs: ['common', 'node', 'typescript', 'module', 'tsdoc'],
+		description: 'TypeScript library with TSDoc support',
+	},
+	nest: {
+		configs: ['common', 'node', 'typescript', 'module', 'nest'],
+		description: 'NestJS application with TypeScript',
+	},
 };
 
 const DEFAULT_IGNORES: Record<string, string[]> = {
-	nextjs: ['.github', '.yarn', '.next', 'node_modules', 'next-env.d.ts'],
-	react: ['.github', '.yarn', 'node_modules', 'dist', 'build'],
-	node: ['.github', '.yarn', 'node_modules', 'dist'],
-	native: ['.github', '.yarn', 'node_modules', '.expo', 'android', 'ios'],
-	library: ['.github', '.yarn', 'node_modules', 'dist'],
-	nest: ['.github', '.yarn', 'node_modules', 'dist'],
+	nextjs: ['.github/**', '.yarn/**', '.next/**', 'node_modules/**', 'next-env.d.ts'],
+	react: ['.github/**', '.yarn/**', 'node_modules/**', 'dist/**', 'build/**'],
+	node: ['.github/**', '.yarn/**', 'node_modules/**', 'dist/**'],
+	native: ['.github/**', '.yarn/**', 'node_modules/**', '.expo/**', 'android/**', 'ios/**'],
+	library: ['.github/**', '.yarn/**', 'node_modules/**', 'dist/**'],
+	nest: ['.github/**', '.yarn/**', 'node_modules/**', 'dist/**'],
 };
 
 const PACKAGE_PRESET_MAP: Record<string, string> = {
@@ -141,8 +82,6 @@ const { values: options } = parseArgs({
 		'no-api-error': { type: 'boolean', default: false },
 		query: { type: 'boolean', default: false },
 		'no-query': { type: 'boolean', default: false },
-		prettier: { type: 'boolean', default: false },
-		'no-prettier': { type: 'boolean', default: false },
 		yes: { type: 'boolean', short: 'y', default: false },
 		cwd: { type: 'string' },
 		help: { type: 'boolean', short: 'h', default: false },
@@ -153,13 +92,13 @@ const { values: options } = parseArgs({
 
 function printHelp(): void {
 	console.log(`
-eslint-config-mahir - Setup ESLint configuration
+@imranbarbhuiya/oxc-config - Setup Oxlint and Oxfmt
 
 Usage:
-  npx eslint-config-mahir [options]
+  npx @imranbarbhuiya/oxc-config [options]
 
 Options:
-	-p, --preset <name>  Preset to use (nextjs, react, node, native, library, nest)
+  -p, --preset <name>  Preset to use (nextjs, react, node, native, library, nest)
   -t, --tailwind       Include Tailwind CSS support
   --no-tailwind        Exclude Tailwind CSS support
   --i18n               Include next-intl i18n rules (Next.js)
@@ -170,72 +109,82 @@ Options:
   --no-central-icons   Exclude central-icons barrel-import rules
   --api-error          Include ApiError rules for queryFn/mutationFn
   --no-api-error       Exclude ApiError rules
-  --query              Include TanStack Query ESLint rules
-  --no-query           Exclude TanStack Query ESLint rules
-  --prettier           Include Prettier with recommended config
-  --no-prettier        Exclude Prettier
+  --query              Include TanStack Query rules
+  --no-query           Exclude TanStack Query rules
   -y, --yes            Skip prompts and use defaults
   --cwd <path>         Working directory (defaults to current directory)
   -h, --help           Show this help message
 
 Examples:
-  npx eslint-config-mahir
-  npx eslint-config-mahir --preset nextjs --tailwind --prettier
-  npx eslint-config-mahir -p react -y
+  npx @imranbarbhuiya/oxc-config
+  npx @imranbarbhuiya/oxc-config --preset nextjs --tailwind
+  npx @imranbarbhuiya/oxc-config -p react -y
 `);
 }
 
-function generateEslintConfig(preset: string, includeTailwind: boolean, extras: ExtraConfigs): string {
-	const presetConfig = PRESETS[preset];
-	const imports = [...presetConfig.imports];
-	const configs = [...presetConfig.configs];
-	const ignores = DEFAULT_IGNORES[preset];
+function generateOxlintConfig(preset: string, includeTailwind: boolean, extras: ExtraConfigs): string {
+	const configs = [...PRESETS[preset].configs];
 
-	if (includeTailwind) {
-		imports.push(TAILWIND_IMPORT);
-		configs.push('tailwind');
-	}
+	if (includeTailwind) configs.push('tailwind');
+	if (extras.i18n) configs.push('i18n');
+	if (extras.nativeTailwind) configs.push('nativeTailwind');
+	if (extras.centralIcons) configs.push('centralIcons');
+	if (extras.apiError) configs.push('apiError');
 
-	if (extras.query) {
-		imports.unshift(QUERY_IMPORT);
-		configs.push("query.configs['flat/recommended']");
-	}
+	const imports = configs.map((name) => {
+		const fragment = name === 'nativeTailwind' ? 'native-tailwind' : name;
+		return `import ${name} from '${PACKAGE_NAME}/${fragment}';`;
+	});
 
-	if (extras.i18n) {
-		imports.push(I18N_IMPORT);
-		configs.push('i18n');
-	}
+	const ignores = DEFAULT_IGNORES[preset].map((ignore) => `'${ignore}'`).join(', ');
+	const queryBlock = extras.query
+		? `
+	jsPlugins: [{ name: 'query', specifier: '@tanstack/eslint-plugin-query' }],
+	rules: {
+		'query/exhaustive-deps': 'error',
+		'query/no-rest-destructuring': 'error',
+		'query/stable-query-client': 'error',
+	},`
+		: '';
 
-	if (extras.nativeTailwind) {
-		imports.push(NATIVE_TAILWIND_IMPORT);
-		configs.push('nativeTailwind');
-	}
+	const env =
+		preset === 'nextjs' || preset === 'react' || preset === 'native'
+			? `{
+		node: true,
+		browser: true,
+		serviceworker: true,
+	}`
+			: `{
+		node: true,
+	}`;
 
-	if (extras.centralIcons) {
-		imports.push(CENTRAL_ICONS_IMPORT);
-		configs.push('centralIcons');
-	}
+	return `import { defineConfig } from 'oxlint';
 
-	if (extras.apiError) {
-		imports.push(API_ERROR_IMPORT);
-		configs.push('apiError');
-	}
+${imports.join('\n')}
 
-	let config = imports.join('\n');
-	config += '\n\n';
-	config += `/**
- * @type {import('@typescript-eslint/utils').TSESLint.FlatConfig.ConfigArray}
- */
-export default [\n`;
-
-	for (const name of configs) config += `\t...${name},\n`;
-
-	config += `\t{
-		ignores: [${ignores.map((i) => `'${i}'`).join(', ')}],
+export default defineConfig({
+	extends: [${configs.join(', ')}],
+	ignorePatterns: [${ignores}],
+	env: ${env},
+	categories: {
+		correctness: 'off',
 	},
-];\n`;
+	options: {
+		typeAware: true,
+	},${queryBlock}
+});
+`;
+}
 
-	return config;
+function generateOxfmtConfig(): string {
+	return `import { defineConfig } from 'oxfmt';
+
+import config from '${PACKAGE_NAME}/oxfmt';
+
+export default defineConfig({
+	...config,
+});
+`;
 }
 
 async function fileExists(filePath: string): Promise<boolean> {
@@ -262,7 +211,6 @@ async function getDependencies(cwd: string): Promise<Record<string, string>> {
 
 function detectPresetFromDependencies(dependencies: Record<string, string>): string | undefined {
 	for (const name of DETECTION_PRIORITY) if (dependencies[name]) return PACKAGE_PRESET_MAP[name];
-
 	return undefined;
 }
 
@@ -284,50 +232,63 @@ function hasTailwind(dependencies: Record<string, string>): boolean {
 	return Boolean(dependencies.tailwindcss || dependencies.nativewind);
 }
 
-async function addLintScript(packageJsonPath: string, includePrettier: boolean): Promise<void> {
+async function updateScripts(packageJsonPath: string): Promise<void> {
 	if (!(await fileExists(packageJsonPath))) {
-		p.log.error('No package.json found. Please run this command in a project with package.json.');
+		p.log.error('No package.json found. Run this command in a project with package.json.');
 		process.exit(1);
 	}
 
 	const content = await fs.readFile(packageJsonPath, 'utf8');
 	const packageJson = JSON.parse(content) as Record<string, unknown>;
-
 	const scripts = (packageJson.scripts as Record<string, string> | undefined) ?? {};
-	scripts.lint = 'TIMING=1 eslint --cache .';
-	if (includePrettier) scripts.format = 'prettier --write --cache --experimental-cli .';
+
+	scripts.lint = 'oxlint --fix .';
+	scripts['lint:check'] = 'oxlint .';
+	scripts.format = 'oxfmt';
+	scripts['format:check'] = 'oxfmt --check';
 	packageJson.scripts = scripts;
 
 	await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, '\t') + '\n');
 }
 
-async function installDependencies(
-	cwd: string,
-	includeTailwind: boolean,
-	includePrettier: boolean,
-	includeQuery: boolean,
-): Promise<string> {
+async function installDependencies(cwd: string, includeTailwind: boolean, includeQuery: boolean): Promise<string> {
 	const pm = await detectPackageManager(cwd);
 	const pmName = pm?.name ?? 'npm';
+	const dependencies = [PACKAGE_NAME, 'oxlint', 'oxlint-tsgolint', 'oxfmt'];
+
+	if (includeTailwind) dependencies.push('eslint-plugin-better-tailwindcss');
+	if (includeQuery) dependencies.push('@tanstack/eslint-plugin-query');
 
 	p.log.info(`Detected package manager: ${pmName}`);
-
-	const deps = ['eslint-config-mahir', 'eslint'];
-	if (includeTailwind) deps.push('eslint-plugin-better-tailwindcss');
-	if (includeQuery) deps.push('@tanstack/eslint-plugin-query');
-	if (includePrettier) deps.push('prettier');
-
 	const spinner = p.spinner();
 	spinner.start('Installing dependencies');
 
-	for (const dep of deps) {
-		spinner.message(`Installing ${dep}`);
-		await addDevDependency(dep, { cwd, silent: true });
+	for (const dependency of dependencies) {
+		spinner.message(`Installing ${dependency}`);
+		await addDevDependency(dependency, { cwd, silent: true });
 	}
 
 	spinner.stop('Dependencies installed');
-
 	return pmName;
+}
+
+async function confirmOverwrite(filePath: string, skipPrompts: boolean): Promise<void> {
+	if (!(await fileExists(filePath)) || skipPrompts) return;
+
+	const result = await p.confirm({
+		message: `${path.basename(filePath)} already exists. Overwrite?`,
+		initialValue: false,
+	});
+
+	if (p.isCancel(result)) {
+		p.cancel('Operation cancelled.');
+		process.exit(0);
+	}
+
+	if (!result) {
+		p.cancel('Aborted.');
+		process.exit(0);
+	}
 }
 
 if (options.help) {
@@ -335,16 +296,14 @@ if (options.help) {
 	process.exit(0);
 }
 
-p.intro('eslint-config-mahir setup');
+p.intro('@imranbarbhuiya/oxc-config setup');
 
 const cwd = options.cwd ? path.resolve(options.cwd) : process.cwd();
 const skipPrompts = options.yes;
-
 const dependencies = await getDependencies(cwd);
 
 let preset = options.preset;
 let includeTailwind = options['no-tailwind'] ? false : options.tailwind ? true : undefined;
-let includePrettier = options['no-prettier'] ? false : options.prettier ? true : undefined;
 let includeI18n = options['no-i18n'] ? false : options.i18n ? true : undefined;
 let includeNativeTailwind = options['no-native-tailwind'] ? false : options['native-tailwind'] ? true : undefined;
 let includeCentralIcons = options['no-central-icons'] ? false : options['central-icons'] ? true : undefined;
@@ -365,8 +324,12 @@ if (!preset) {
 			const detected = presetOptions.find((option) => option.value === detectedPreset);
 			if (detected) {
 				detected.hint = `Detected: ${detected.hint}`;
-				const remaining = presetOptions.filter((option) => option.value !== detectedPreset);
-				presetOptions.splice(0, presetOptions.length, detected, ...remaining);
+				presetOptions.splice(
+					0,
+					presetOptions.length,
+					detected,
+					...presetOptions.filter(({ value }) => value !== detectedPreset),
+				);
 			}
 		}
 
@@ -398,12 +361,10 @@ if (includeTailwind === undefined) {
 			message: 'Include Tailwind CSS support?',
 			initialValue: hasTailwind(dependencies),
 		});
-
 		if (p.isCancel(result)) {
 			p.cancel('Operation cancelled.');
 			process.exit(0);
 		}
-
 		includeTailwind = result;
 	}
 }
@@ -416,12 +377,10 @@ if (includeI18n === undefined) {
 			message: 'Include next-intl i18n rules?',
 			initialValue: hasNextIntl(dependencies),
 		});
-
 		if (p.isCancel(result)) {
 			p.cancel('Operation cancelled.');
 			process.exit(0);
 		}
-
 		includeI18n = result;
 	}
 }
@@ -431,15 +390,13 @@ if (includeNativeTailwind === undefined) {
 	else if (skipPrompts) includeNativeTailwind = true;
 	else {
 		const result = await p.confirm({
-			message: 'Include React Native Tailwind className rules (flex / Inter fonts)?',
+			message: 'Include React Native Tailwind className rules?',
 			initialValue: true,
 		});
-
 		if (p.isCancel(result)) {
 			p.cancel('Operation cancelled.');
 			process.exit(0);
 		}
-
 		includeNativeTailwind = result;
 	}
 }
@@ -452,12 +409,10 @@ if (includeCentralIcons === undefined) {
 			message: 'Include central-icons barrel-import rules?',
 			initialValue: hasCentralIcons(dependencies),
 		});
-
 		if (p.isCancel(result)) {
 			p.cancel('Operation cancelled.');
 			process.exit(0);
 		}
-
 		includeCentralIcons = result;
 	}
 }
@@ -467,15 +422,13 @@ if (includeQuery === undefined) {
 	else if (skipPrompts) includeQuery = hasTanstackQuery(dependencies);
 	else {
 		const result = await p.confirm({
-			message: 'Include TanStack Query ESLint rules?',
+			message: 'Include TanStack Query rules?',
 			initialValue: hasTanstackQuery(dependencies),
 		});
-
 		if (p.isCancel(result)) {
 			p.cancel('Operation cancelled.');
 			process.exit(0);
 		}
-
 		includeQuery = result;
 	}
 }
@@ -488,93 +441,46 @@ if (includeApiError === undefined) {
 			message: 'Include ApiError rules for queryFn/mutationFn?',
 			initialValue: hasTanstackQuery(dependencies),
 		});
-
 		if (p.isCancel(result)) {
 			p.cancel('Operation cancelled.');
 			process.exit(0);
 		}
-
 		includeApiError = result;
 	}
 }
 
-if (includePrettier === undefined) {
-	if (skipPrompts) includePrettier = true;
-	else {
-		const result = await p.confirm({
-			message: 'Include Prettier with recommended config?',
-			initialValue: true,
-		});
-
-		if (p.isCancel(result)) {
-			p.cancel('Operation cancelled.');
-			process.exit(0);
-		}
-
-		includePrettier = result;
-	}
-}
-
-p.log.step(`Setting up ESLint with preset: ${preset}`);
+p.log.step(`Setting up Oxlint and Oxfmt with preset: ${preset}`);
 if (includeTailwind) p.log.info('Including Tailwind CSS support');
 if (includeI18n) p.log.info('Including next-intl i18n rules');
 if (includeNativeTailwind) p.log.info('Including React Native Tailwind className rules');
 if (includeCentralIcons) p.log.info('Including central-icons barrel-import rules');
-if (includeQuery) p.log.info('Including TanStack Query ESLint rules');
+if (includeQuery) p.log.info('Including TanStack Query rules');
 if (includeApiError) p.log.info('Including ApiError rules for queryFn/mutationFn');
-if (includePrettier) p.log.info('Including Prettier with recommended config');
 
-const eslintConfigPath = path.join(cwd, 'eslint.config.js');
+const oxlintConfigPath = path.join(cwd, 'oxlint.config.ts');
+const oxfmtConfigPath = path.join(cwd, 'oxfmt.config.ts');
 const packageJsonPath = path.join(cwd, 'package.json');
-const prettierConfigPath = path.join(cwd, '.prettierrc');
 
-if (await fileExists(eslintConfigPath)) {
-	let shouldOverwrite = skipPrompts;
+await confirmOverwrite(oxlintConfigPath, skipPrompts);
+await confirmOverwrite(oxfmtConfigPath, skipPrompts);
+await fs.writeFile(
+	oxlintConfigPath,
+	generateOxlintConfig(preset, includeTailwind, {
+		i18n: includeI18n,
+		nativeTailwind: includeNativeTailwind,
+		centralIcons: includeCentralIcons,
+		query: includeQuery,
+		apiError: includeApiError,
+	}),
+);
+await fs.writeFile(oxfmtConfigPath, generateOxfmtConfig());
+p.log.success('Created oxlint.config.ts and oxfmt.config.ts');
 
-	if (!skipPrompts) {
-		const result = await p.confirm({
-			message: 'eslint.config.js already exists. Overwrite?',
-			initialValue: false,
-		});
+await updateScripts(packageJsonPath);
+p.log.success('Updated package.json scripts');
 
-		if (p.isCancel(result)) {
-			p.cancel('Operation cancelled.');
-			process.exit(0);
-		}
-
-		shouldOverwrite = result;
-	}
-
-	if (!shouldOverwrite) {
-		p.cancel('Aborted.');
-		process.exit(0);
-	}
-}
-
-const eslintConfig = generateEslintConfig(preset, includeTailwind, {
-	i18n: includeI18n,
-	nativeTailwind: includeNativeTailwind,
-	centralIcons: includeCentralIcons,
-	query: includeQuery,
-	apiError: includeApiError,
-});
-await fs.writeFile(eslintConfigPath, eslintConfig);
-p.log.success('Created eslint.config.js');
-
-if (includePrettier) {
-	await fs.writeFile(prettierConfigPath, JSON.stringify(PRETTIER_CONFIG, null, '\t') + '\n');
-	p.log.success('Created .prettierrc');
-}
-
-await addLintScript(packageJsonPath, includePrettier);
-p.log.success('Updated package.json with lint script');
-
-const pmName = await installDependencies(cwd, includeTailwind, includePrettier, includeQuery);
-
-const runPrefix = pmName === 'npm' ? `${pmName} run` : pmName;
-const commands = [`${runPrefix} lint`];
-if (includePrettier) commands.push(`${runPrefix} format`);
-
-p.outro(`Setup complete! Run \`${commands.join(' && ')}\` to lint your code`);
+const pmName = await installDependencies(cwd, includeTailwind, includeQuery);
+const runPrefix = pmName === 'npm' ? 'npm run' : pmName;
+p.outro(`Setup complete! Run \`${runPrefix} lint && ${runPrefix} format\``);
 
 process.exit(0);

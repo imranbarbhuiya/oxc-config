@@ -1,24 +1,17 @@
-import eslintNestJs from '@darraghor/eslint-plugin-nestjs-typed';
+import { defineConfig } from 'oxlint';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import { localPlugin, nativePlugins } from './config.js';
 
-const rules: TSESLint.FlatConfig.Rules = {
-	'@darraghor/nestjs-typed/sort-module-metadata-arrays': 2,
+import type { OxlintConfig } from 'oxlint';
+
+const rules: NonNullable<OxlintConfig['rules']> = {
+	'nestjs-typed/sort-module-metadata-arrays': 2,
 };
 
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/nest',
-		plugins: {
-			'@darraghor/nestjs-typed': eslintNestJs.plugin,
-		},
-		languageOptions: {
-			parserOptions: {
-				emitDecoratorMetadata: true,
-			},
-		},
-		rules,
-	},
-];
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [localPlugin('nestjs-typed', './nest-plugin.js')],
+	rules,
+});
 
 export default config;

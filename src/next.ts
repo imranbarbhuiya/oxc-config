@@ -1,38 +1,35 @@
-import eslintPluginNext from '@next/eslint-plugin-next';
+import { defineConfig } from 'oxlint';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import { nativePlugins } from './config.js';
 
-const rules: TSESLint.FlatConfig.Rules = {
-	'@next/next/google-font-display': 1,
-	'@next/next/google-font-preconnect': 1,
-	'@next/next/inline-script-id': 2,
-	'@next/next/next-script-for-ga': 1,
-	'@next/next/no-assign-module-variable': 2,
-	'@next/next/no-before-interactive-script-outside-document': 2,
-	'@next/next/no-css-tags': 1,
-	'@next/next/no-document-import-in-page': 2,
-	'@next/next/no-duplicate-head': 2,
-	'@next/next/no-head-element': 1,
-	'@next/next/no-head-import-in-document': 2,
-	'@next/next/no-html-link-for-pages': 1,
-	'@next/next/no-img-element': 1,
-	'@next/next/no-page-custom-font': 1,
-	'@next/next/no-script-component-in-head': 2,
-	'@next/next/no-styled-jsx-in-document': 2,
-	'@next/next/no-sync-scripts': 2,
-	'@next/next/no-title-in-document-head': 2,
-	'@next/next/no-typos': 2,
-	'@next/next/no-unwanted-polyfillio': 2,
+import type { OxlintConfig } from 'oxlint';
+
+const rules: NonNullable<OxlintConfig['rules']> = {
+	'nextjs/google-font-display': 1,
+	'nextjs/google-font-preconnect': 1,
+	'nextjs/inline-script-id': 2,
+	'nextjs/next-script-for-ga': 1,
+	'nextjs/no-assign-module-variable': 2,
+	'nextjs/no-before-interactive-script-outside-document': 2,
+	'nextjs/no-css-tags': 1,
+	'nextjs/no-document-import-in-page': 2,
+	'nextjs/no-duplicate-head': 2,
+	'nextjs/no-head-element': 1,
+	'nextjs/no-head-import-in-document': 2,
+	'nextjs/no-html-link-for-pages': 1,
+	'nextjs/no-img-element': 1,
+	'nextjs/no-page-custom-font': 1,
+	'nextjs/no-script-component-in-head': 2,
+	'nextjs/no-styled-jsx-in-document': 2,
+	'nextjs/no-sync-scripts': 2,
+	'nextjs/no-title-in-document-head': 2,
+	'nextjs/no-typos': 2,
+	'nextjs/no-unwanted-polyfillio': 2,
 };
 
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/next',
-		plugins: {
-			'@next/next': eslintPluginNext,
-		},
-		rules,
-	},
-];
+const config = defineConfig({
+	plugins: nativePlugins,
+	rules,
+});
 
 export default config;

@@ -1,17 +1,13 @@
-import pluginNativeTailwind from './plugins/native-tailwind.js';
+import { defineConfig } from 'oxlint';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import { localPlugin, nativePlugins } from './config.js';
 
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/native-tailwind',
-		plugins: {
-			'mahir-native-tailwind': pluginNativeTailwind,
-		},
-		rules: {
-			'mahir-native-tailwind/class-name-rules': 2,
-		},
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [localPlugin('mahir-native-tailwind', './plugins/native-tailwind.js')],
+	rules: {
+		'mahir-native-tailwind/class-name-rules': 2,
 	},
-];
+});
 
 export default config;

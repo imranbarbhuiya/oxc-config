@@ -1,25 +1,21 @@
-import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
+import { defineConfig } from 'oxlint';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import { nativePlugins, packagePlugin } from './config.js';
 
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/tailwind',
-		settings: {
-			'better-tailwindcss': {
-				entryPoint: 'app/globals.css',
-			},
-		},
-		plugins: {
-			'better-tailwindcss': eslintPluginBetterTailwindcss,
-		},
-		rules: {
-			'better-tailwindcss/enforce-consistent-class-order': 'warn',
-			'better-tailwindcss/no-unnecessary-whitespace': 'warn',
-			'better-tailwindcss/enforce-canonical-classes': 'warn',
-			'better-tailwindcss/no-unknown-classes': 'error',
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [packagePlugin('better-tailwindcss-js', 'eslint-plugin-better-tailwindcss')],
+	settings: {
+		'better-tailwindcss': {
+			entryPoint: 'app/globals.css',
 		},
 	},
-];
+	rules: {
+		'better-tailwindcss-js/enforce-consistent-class-order': 'warn',
+		'better-tailwindcss-js/no-unnecessary-whitespace': 'warn',
+		'better-tailwindcss-js/enforce-canonical-classes': 'warn',
+		'better-tailwindcss-js/no-unknown-classes': 'error',
+	},
+});
 
 export default config;

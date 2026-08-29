@@ -1,17 +1,13 @@
-import pluginApiError from './plugins/api-error.js';
+import { defineConfig } from 'oxlint';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import { localPlugin, nativePlugins } from './config.js';
 
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/api-error',
-		plugins: {
-			'mahir-api-error': pluginApiError,
-		},
-		rules: {
-			'mahir-api-error/require-api-error': 2,
-		},
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [localPlugin('mahir-api-error', './plugins/api-error.js')],
+	rules: {
+		'mahir-api-error/require-api-error': 2,
 	},
-];
+});
 
 export default config;

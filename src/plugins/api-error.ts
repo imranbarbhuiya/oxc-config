@@ -2,6 +2,19 @@ import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
 const DEFAULT_ALLOWED_ERRORS = ['ApiError', 'FormValidationError'];
 
+function getStaticFactoryCallee(arg: TSESTree.ThrowStatement['argument']) {
+	if (arg.type !== 'CallExpression') return undefined;
+	const { callee } = arg;
+	if (callee.type !== 'MemberExpression' || callee.computed) return undefined;
+	const { object, property } = callee;
+	if (object.type !== 'Identifier' || property.type !== 'Identifier') return undefined;
+	return { callee, name: object.name };
+}
+
+function isAstNode(value: unknown): value is TSESTree.Node {
+	return typeof value === 'object' && value !== null && 'type' in value && typeof value.type === 'string';
+}
+
 type Options = [
 	{
 		allowedErrors?: string[];
@@ -54,15 +67,6 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorCall' | '
 			if (!moduleFns.has(name)) moduleFns.set(name, body);
 		}
 
-		function getStaticFactoryCallee(arg: TSESTree.ThrowStatement['argument']) {
-			if (arg.type !== 'CallExpression') return undefined;
-			const { callee } = arg;
-			if (callee.type !== 'MemberExpression' || callee.computed) return undefined;
-			const { object, property } = callee;
-			if (object.type !== 'Identifier' || property.type !== 'Identifier') return undefined;
-			return { callee, name: object.name };
-		}
-
 		function isAllowedThrow(arg: TSESTree.ThrowStatement['argument']) {
 			if (arg.type === 'NewExpression' && arg.callee.type === 'Identifier') return allowedErrors.has(arg.callee.name);
 
@@ -100,10 +104,6 @@ const requireApiError: TSESLint.RuleModule<'useApiError' | 'useApiErrorCall' | '
 					data: { thrown: sourceCode.getText(arg), fnType, allowed: allowedExample },
 				});
 			}
-		}
-
-		function isAstNode(value: unknown): value is TSESTree.Node {
-			return typeof value === 'object' && value !== null && 'type' in value && typeof value.type === 'string';
 		}
 
 		function walkThrows(node: TSESTree.Node | null | undefined, fnType: string, visited = new Set<TSESTree.Node>()) {

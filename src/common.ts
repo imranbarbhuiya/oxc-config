@@ -1,16 +1,15 @@
-import eslintPluginImportX from 'eslint-plugin-import-x';
-// @ts-expect-error --  eslint-plugin-promise is not typed
-import eslintPluginPromise from 'eslint-plugin-promise';
-import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import { defineConfig } from 'oxlint';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import { nativePlugins, packagePlugin } from './config.js';
 
-const rules: TSESLint.FlatConfig.Rules = {
+import type { OxlintConfig } from 'oxlint';
+
+const rules: NonNullable<OxlintConfig['rules']> = {
 	'array-callback-return': 2,
-	'arrow-body-style': [2, 'as-needed'],
+	'eslint-js/arrow-body-style': [2, 'as-needed'],
 	'block-scoped-var': 2,
 	'consistent-return': 2,
-	'consistent-this': [2, 'self'],
+	'eslint-js/consistent-this': [2, 'self'],
 	'constructor-super': 2,
 	curly: [2, 'multi-or-nest'],
 	'default-case': 2,
@@ -31,14 +30,14 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'getter-return': 2,
 	'grouped-accessor-pairs': [2, 'getBeforeSet'],
 	'guard-for-in': 2,
-	'import-x/export': 2,
-	'import-x/first': 2,
-	'import-x/newline-after-import': 2,
-	'import-x/no-absolute-path': 2,
-	'import-x/no-amd': 2,
-	'import-x/no-duplicates': 2,
-	'import-x/no-dynamic-require': 2,
-	'import-x/no-extraneous-dependencies': [
+	'import/export': 2,
+	'import/first': 2,
+	'import/newline-after-import': 2,
+	'import/no-absolute-path': 2,
+	'import/no-amd': 2,
+	'import/no-duplicates': 2,
+	'import/no-dynamic-require': 2,
+	'import-js/no-extraneous-dependencies': [
 		2,
 		{
 			devDependencies: true,
@@ -46,11 +45,11 @@ const rules: TSESLint.FlatConfig.Rules = {
 			peerDependencies: true,
 		},
 	],
-	'import-x/no-mutable-exports': 2,
-	'import-x/no-self-import': 2,
-	'import-x/no-useless-path-segments': 2,
-	'import-x/no-webpack-loader-syntax': 2,
-	'import-x/order': [
+	'import/no-mutable-exports': 2,
+	'import/no-self-import': 2,
+	'import-js/no-useless-path-segments': 2,
+	'import/no-webpack-loader-syntax': 2,
+	'import-js/order': [
 		2,
 		{
 			alphabetize: {
@@ -74,7 +73,7 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'no-control-regex': 2,
 	'no-debugger': 2,
 	'no-delete-var': 2,
-	'no-dupe-args': 2,
+	'eslint-js/no-dupe-args': 2,
 	'no-dupe-class-members': 2,
 	'no-dupe-else-if': 2,
 	'no-dupe-keys': 2,
@@ -110,8 +109,8 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'no-new-wrappers': 2,
 	'no-nonoctal-decimal-escape': 2,
 	'no-obj-calls': 2,
-	'no-octal': 2,
-	'no-octal-escape': 2,
+	'eslint-js/no-octal': 2,
+	'eslint-js/no-octal-escape': 2,
 	'no-promise-executor-return': 2,
 	'no-proto': 2,
 	'no-prototype-builtins': 2,
@@ -140,7 +139,7 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'no-this-before-super': 2,
 	'no-throw-literal': 2,
 	'no-undef': 2,
-	'no-undef-init': 2,
+	'eslint-js/no-undef-init': 2,
 	'no-unexpected-multiline': 2,
 	'no-unmodified-loop-condition': 2,
 	'no-unneeded-ternary': 2,
@@ -203,7 +202,7 @@ const rules: TSESLint.FlatConfig.Rules = {
 	radix: 2,
 	'require-yield': 2,
 	'sort-vars': 2,
-	strict: [2, 'never'],
+	'eslint-js/strict': [2, 'never'],
 	'symbol-description': 2,
 	'unicode-bom': [2, 'never'],
 	'unicorn/catch-error-name': [
@@ -218,13 +217,13 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'unicorn/escape-case': 2,
 	'unicorn/new-for-builtins': 2,
 	'unicorn/no-abusive-eslint-disable': 2,
-	'unicorn/no-for-each': 1,
+	'unicorn-js/no-for-each': 1,
 	'unicorn/no-array-method-this-argument': 2,
 	'unicorn/no-await-in-promise-methods': 2,
 	'unicorn/no-document-cookie': 2,
 	'unicorn/no-empty-file': 2,
-	'unicorn/no-for-loop': 2,
-	'unicorn/prefer-unicode-code-point-escapes': 2,
+	'unicorn-js/no-for-loop': 2,
+	'unicorn-js/prefer-unicode-code-point-escapes': 2,
 	'unicorn/no-instanceof-array': 2,
 	'unicorn/no-invalid-remove-event-listener': 2,
 	'unicorn/no-lonely-if': 2,
@@ -239,7 +238,7 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'unicorn/no-typeof-undefined': 2,
 	'unicorn/no-unnecessary-await': 2,
 	'unicorn/no-unreadable-iife': 2,
-	'unicorn/no-unused-properties': 2,
+	'unicorn-js/no-unused-properties': 2,
 	'unicorn/no-useless-fallback-in-spread': 2,
 	'unicorn/no-useless-length-check': 2,
 	'unicorn/no-useless-promise-resolve-reject': 2,
@@ -293,7 +292,7 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'unicorn/require-array-join-separator': 2,
 	'unicorn/require-number-to-fixed-digits-argument': 2,
 	'unicorn/require-post-message-target-origin': 2,
-	'unicorn/template-indent': 2,
+	'unicorn-js/template-indent': 2,
 	'unicorn/text-encoding-identifier-case': 2,
 	'unicorn/throw-new-error': 2,
 	'use-isnan': 2,
@@ -307,40 +306,17 @@ const rules: TSESLint.FlatConfig.Rules = {
 	yoda: [2, 'never'],
 };
 
-const settings: TSESLint.FlatConfig.Settings = {
-	'import-x/extensions': ['.js'],
-	'import-x/resolver': {
-		node: {
-			extensions: ['.js'],
-		},
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [
+		packagePlugin('eslint-js', 'oxlint-plugin-eslint'),
+		packagePlugin('import-js', 'eslint-plugin-import-x'),
+		packagePlugin('unicorn-js', 'eslint-plugin-unicorn'),
+	],
+	options: {
+		reportUnusedDisableDirectives: 'warn',
 	},
-};
-
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/common',
-		linterOptions: {
-			reportUnusedDisableDirectives: 'warn',
-		},
-		languageOptions: {
-			ecmaVersion: 'latest',
-			sourceType: 'module',
-			parserOptions: {
-				requireConfigFile: false,
-				ecmaFeatures: {
-					globalReturn: false,
-					impliedStrict: true,
-				},
-			},
-		},
-		plugins: {
-			'import-x': eslintPluginImportX,
-			unicorn: eslintPluginUnicorn,
-			promise: eslintPluginPromise,
-		},
-		rules,
-		settings,
-	},
-];
+	rules,
+});
 
 export default config;

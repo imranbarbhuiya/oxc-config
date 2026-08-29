@@ -3,16 +3,15 @@ name: Continuous Delivery
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 jobs:
   Publish:
     name: Publish
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - name: Checkout Project
         uses: actions/checkout@v6
@@ -26,6 +25,15 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
       - name: Publish
-        run: npm publish --provenance --tag latest
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version >/dev/null 2>&1; then
+            echo "$PACKAGE_NAME@$PACKAGE_VERSION is already published"
+          else
+            npm publish --access public --provenance
+          fi
+      - name: Create GitHub Release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}

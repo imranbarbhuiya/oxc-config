@@ -1,33 +1,32 @@
-import eslintPluginReactHooks from 'eslint-plugin-react-hooks';
-import globals from 'globals';
+import { defineConfig } from 'oxlint';
 
+import { nativePlugins, packagePlugin } from './config.js';
 import jsx from './jsx.js';
 
-import type { TSESLint } from '@typescript-eslint/utils';
+import type { OxlintConfig } from 'oxlint';
 
-const rules: TSESLint.FlatConfig.Rules = {
-	'react-hooks/exhaustive-deps': 2,
-	'react-hooks/rules-of-hooks': 2,
-	'react-hooks/immutability': 2,
-	'react-hooks/purity': 2,
-	'react-hooks/refs': 2,
-	// 'react-hooks/set-state-in-effect': 2,
-	'react-hooks/set-state-in-render': 2,
-	'react/boolean-prop-naming': 2,
+const rules: NonNullable<OxlintConfig['rules']> = {
+	'react/exhaustive-deps': 2,
+	'react/rules-of-hooks': 2,
+	'react/immutability': 2,
+	'react/purity': 2,
+	'react/refs': 2,
+	'react/set-state-in-render': 2,
+	'react-js/boolean-prop-naming': 2,
 	'react/button-has-type': 2,
 	'react/hook-use-state': 2,
 	'react/iframe-missing-sandbox': 2,
-	'react/no-access-state-in-setstate': 2,
-	'react/no-arrow-function-lifecycle': 2,
+	'react-js/no-access-state-in-setstate': 2,
+	'react-js/no-arrow-function-lifecycle': 2,
 	'react/no-children-prop': 2,
 	'react/no-danger': 2,
 	'react/no-danger-with-children': 2,
-	'react/no-deprecated': 2,
+	'react-js/no-deprecated': 2,
 	'react/no-did-mount-set-state': 2,
 	'react/no-did-update-set-state': 2,
 	'react/no-direct-mutation-state': 2,
 	'react/no-find-dom-node': 2,
-	'react/no-invalid-html-attribute': 2,
+	'react-js/no-invalid-html-attribute': 2,
 	'react/no-is-mounted': 2,
 	'react/no-namespace': 2,
 	'react/no-redundant-should-component-update': 2,
@@ -35,50 +34,37 @@ const rules: TSESLint.FlatConfig.Rules = {
 	'react/no-set-state': 2,
 	'react/no-string-refs': 2,
 	'react/no-this-in-sfc': 2,
-	'react/no-typos': 2,
+	'react-js/no-typos': 2,
 	'react/no-unknown-property': 2,
 	'react/no-unsafe': 2,
 	'react/no-unstable-nested-components': 2,
-	'react/no-unused-class-component-methods': 2,
-	'react/no-unused-state': 2,
+	'react-js/no-unused-class-component-methods': 2,
+	'react-js/no-unused-state': 2,
 	'react/no-will-update-set-state': 2,
 	'react/prefer-es6-class': 2,
-	'react/prefer-read-only-props': 2,
-	'react/prefer-stateless-function': [
+	'react-js/prefer-read-only-props': 2,
+	'react-js/prefer-stateless-function': [
 		2,
 		{
 			ignorePureComponents: true,
 		},
 	],
 	'react/require-render-return': 2,
-	'react/sort-comp': 2,
+	'react-js/sort-comp': 2,
 	'react/state-in-constructor': [2, 'always'],
-	'react/static-property-placement': 2,
+	'react-js/static-property-placement': 2,
 	'react/void-dom-elements-no-children': 2,
 };
 
-const settings: TSESLint.FlatConfig.Settings = {
-	react: {
-		version: 'detect',
+const config = defineConfig({
+	extends: [jsx],
+	plugins: nativePlugins,
+	jsPlugins: [packagePlugin('react-js', 'eslint-plugin-react')],
+	env: {
+		browser: true,
+		serviceworker: true,
 	},
-};
-
-const config: TSESLint.FlatConfig.ConfigArray = [
-	...jsx,
-	{
-		name: 'mahir/react',
-		languageOptions: {
-			globals: {
-				...globals.serviceworker,
-				...globals.browser,
-			},
-		},
-		plugins: {
-			'react-hooks': eslintPluginReactHooks,
-		},
-		rules,
-		settings,
-	},
-];
+	rules,
+});
 
 export default config;

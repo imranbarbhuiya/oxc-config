@@ -1,21 +1,24 @@
-import type { TSESLint } from '@typescript-eslint/utils';
+import { defineConfig } from 'oxlint';
 
-const rules: TSESLint.FlatConfig.Rules = {
-	'n/prefer-global/buffer': [2, 'always'],
-	'n/prefer-global/console': [2, 'always'],
-	'n/prefer-global/process': [2, 'always'],
-	'n/prefer-global/text-decoder': [2, 'always'],
-	'n/prefer-global/text-encoder': [2, 'always'],
-	'n/prefer-global/url': [2, 'always'],
-	'n/prefer-global/url-search-params': [2, 'always'],
+import { nativePlugins, packagePlugin } from './config.js';
+
+import type { OxlintConfig } from 'oxlint';
+
+const rules: NonNullable<OxlintConfig['rules']> = {
+	'node-js/prefer-global/buffer': [2, 'always'],
+	'node-js/prefer-global/console': [2, 'always'],
+	'node-js/prefer-global/process': [2, 'always'],
+	'node-js/prefer-global/text-decoder': [2, 'always'],
+	'node-js/prefer-global/text-encoder': [2, 'always'],
+	'node-js/prefer-global/url': [2, 'always'],
+	'node-js/prefer-global/url-search-params': [2, 'always'],
 	'no-restricted-globals': 0,
 };
 
-const config: TSESLint.FlatConfig.ConfigArray = [
-	{
-		name: 'mahir/edge',
-		rules,
-	},
-];
+const config = defineConfig({
+	plugins: nativePlugins,
+	jsPlugins: [packagePlugin('node-js', 'eslint-plugin-n')],
+	rules,
+});
 
 export default config;

@@ -5,19 +5,19 @@ on:
     branches:
       - main
   pull_request:
+    branches:
+      - main
 
 jobs:
-  Linting:
-    name: Linting
+  Checks:
+    name: Checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Project
         uses: actions/checkout@v6
       - name: Setup Bun
-        if: steps.config.outputs.skip-platform != 'true'
         uses: oven-sh/setup-bun@v2
       - name: Setup Node.js
-        if: steps.config.outputs.skip-platform != 'true'
         uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -26,8 +26,8 @@ jobs:
       - name: Build
         run: bun run build
       - name: Run Tests
-        run: bun test
-      - name: Run ESLint
-        run: bun lint --fix=false
-      - name: Run Prettier
-        run: bun prettier --check .
+        run: bun run test
+      - name: Run Oxlint
+        run: bun run lint:check
+      - name: Run Oxfmt
+        run: bun run format:check
