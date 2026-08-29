@@ -50,14 +50,15 @@ async function createProject(source: string, relativeFile: string): Promise<Proj
 	return { directory, file };
 }
 
-async function writeOxlintConfig(directory: string, configs: string[]) {
+async function writeOxlintConfig(directory: string, configs: string[], extra?: { rules?: Record<string, unknown> }) {
 	const imports = configs
 		.map((name, index) => `import config${index} from ${JSON.stringify(distModule(name))};`)
 		.join('\n');
 	const extendedConfigs = configs.map((_, index) => `config${index}`).join(', ');
+	const extraRules = extra?.rules ? `, rules: ${JSON.stringify(extra.rules)}` : '';
 	await Bun.write(
 		join(directory, 'oxlint.config.mjs'),
-		`import { defineConfig } from ${JSON.stringify(oxlintModule)};\n${imports}\nexport default defineConfig({ extends: [${extendedConfigs}], categories: { correctness: 'off' } });\n`,
+		`import { defineConfig } from ${JSON.stringify(oxlintModule)};\n${imports}\nexport default defineConfig({ extends: [${extendedConfigs}], categories: { correctness: 'off' }${extraRules} });\n`,
 	);
 }
 
@@ -73,10 +74,11 @@ export async function withOxlintProject<T>(
 	relativeFile: string,
 	configs: string[],
 	callback: (project: Project) => Promise<T>,
+	extra?: { rules?: Record<string, unknown> },
 ): Promise<T> {
 	const project = await createProject(source, relativeFile);
 	try {
-		await writeOxlintConfig(project.directory, configs);
+		await writeOxlintConfig(project.directory, configs, extra);
 		return await callback(project);
 	} finally {
 		await rm(project.directory, { force: true, recursive: true });

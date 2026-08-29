@@ -57,7 +57,7 @@ const sortModuleMetadataArrays: TSESLint.RuleModule<'moduleMetadataArraysAreSort
 	},
 	defaultOptions: [{ locale: DEFAULT_LOCALE }],
 	create(context) {
-		const locale = context.options[0].locale ?? DEFAULT_LOCALE;
+		const locale = context.options.at(0)?.locale ?? DEFAULT_LOCALE;
 		const sourceCode = context.sourceCode;
 		return {
 			'ClassDeclaration > Decorator[expression.callee.name="Module"] Property > ArrayExpression'(

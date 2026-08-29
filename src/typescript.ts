@@ -38,7 +38,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 			fixMixedExportsWithInlineTypeSpecifier: true,
 		},
 	],
-	'typescript-js/default-param-last': 2,
+	'default-param-last': 2,
 	'typescript/dot-notation': [
 		2,
 		{
@@ -47,8 +47,8 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 			allowPrivateClassPropertyAccess: true,
 		},
 	],
-	'typescript-js/method-signature-style': [2, 'property'],
-	'typescript-js/no-array-constructor': 2,
+	'typescript/method-signature-style': [2, 'property'],
+	'typescript/no-array-constructor': 2,
 	'typescript/no-array-delete': 0,
 	'typescript/no-base-to-string': [
 		1,
@@ -57,7 +57,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 		},
 	],
 	'typescript/no-confusing-non-null-assertion': 2,
-	'typescript-js/no-dupe-class-members': 2,
+	'no-dupe-class-members': 2,
 	'typescript/no-duplicate-enum-values': 2,
 	'typescript/no-duplicate-type-constituents': 2,
 	'typescript/no-dynamic-delete': 1,
@@ -86,7 +86,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 			ignoreProperties: true,
 		},
 	],
-	'typescript-js/no-invalid-this': 2,
 	'typescript/no-invalid-void-type': [
 		2,
 		{
@@ -111,7 +110,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/no-namespace': 0,
 	'typescript/no-non-null-asserted-nullish-coalescing': 2,
 	'typescript/no-non-null-asserted-optional-chain': 2,
-	'typescript-js/no-redeclare': [
+	'no-redeclare': [
 		2,
 		{
 			builtinGlobals: true,
@@ -139,9 +138,9 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/no-unsafe-member-access': 0,
 	'typescript/no-unsafe-return': 0,
 	'typescript/no-unsafe-unary-minus': 0,
-	'typescript-js/no-unused-expressions': 2,
+	'no-unused-expressions': 2,
 	'typescript/no-unused-vars': 0,
-	'typescript-js/no-use-before-define': [
+	'no-use-before-define': [
 		2,
 		{
 			classes: true,
@@ -149,10 +148,9 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 			variables: true,
 		},
 	],
-	'typescript-js/no-useless-constructor': 2,
+	'no-useless-constructor': 2,
 	'typescript/only-throw-error': 2,
 	'typescript/prefer-as-const': 0,
-	'typescript-js/prefer-as-const': 0,
 	'typescript/prefer-for-of': 2,
 	'typescript/prefer-function-type': 2,
 	'typescript/prefer-includes': 2,
@@ -192,13 +190,10 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'consistent-return': 0,
 	'default-case': 0,
 	'default-case-last': 0,
-	'default-param-last': 0,
 	'dot-notation': 0,
 	'import/no-dynamic-require': 0,
 	'no-shadow': 0,
 	'no-undef': 0,
-	'no-use-before-define': 0,
-	'no-useless-constructor': 0,
 	'sonarjs/no-all-duplicated-branches': 2,
 	'sonarjs/no-collapsible-if': 2,
 	'sonarjs/no-collection-size-mischeck': 2,
@@ -226,10 +221,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 };
 const config = defineConfig({
 	plugins: nativePlugins,
-	jsPlugins: [
-		packagePlugin('sonarjs', 'eslint-plugin-sonarjs'),
-		packagePlugin('typescript-js', '@typescript-eslint/eslint-plugin'),
-	],
+	jsPlugins: [packagePlugin('sonarjs', 'eslint-plugin-sonarjs')],
 	rules,
 });
 

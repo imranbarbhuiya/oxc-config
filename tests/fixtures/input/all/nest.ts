@@ -1,5 +1,5 @@
 type Service = {
-	run(): Promise<void>;
+	run: () => Promise<void>;
 };
 
 const services: Array<Service> = [];

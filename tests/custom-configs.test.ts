@@ -9,6 +9,7 @@ const fixturesDirectory = join(import.meta.dir, 'fixtures/focused');
 
 interface Diagnostic {
 	code: string;
+	message: string;
 }
 
 function diagnostics(stdout: string): Diagnostic[] {
@@ -154,6 +155,75 @@ describe('custom configs', () => {
 			const result = await runOxlint(project);
 			expect(diagnostics(result.stdout).every(({ code }) => !code.includes('import-js/order') && !code.includes('import/order'))).toBeTrue();
 			expect(await readFile(project.file, 'utf8')).toBe(expected);
+		});
+	});
+
+	test('arrow-body-style collapses as-needed returns and keeps other blocks', async () => {
+		await withOxlintProject(join(fixturesDirectory, 'arrow-body.ts'), 'arrow-body.ts', ['common'], async (project) => {
+			const result = await runOxlint(project);
+			expect(result.exitCode).toBe(0);
+			expect(diagnostics(result.stdout).every(({ code }) => !code.includes('eslint-js/arrow-body-style'))).toBeTrue();
+			const source = await readFile(project.file, 'utf8');
+			expect(source).toMatch(/export const add = \(left: number, right: number\) =>\s+left \+ right\s*;/);
+			expect(source).toContain('export const run = () => {');
+			expect(source).toContain('return 1;');
+		});
+	});
+
+	test('no-array-for-each reports forEach the same as the old unicorn-js rule', async () => {
+		await withOxlintProject(join(fixturesDirectory, 'for-each.ts'), 'for-each.ts', ['common'], async (project) => {
+			const result = await runOxlint(project);
+			expectRule(result.stdout, 'no-array-for-each');
+			expect(diagnostics(result.stdout).every(({ code }) => !code.includes('unicorn-js/no-for-each'))).toBeTrue();
+			expect(await readFile(project.file, 'utf8')).toContain('.forEach(');
+		});
+	});
+
+	test('restricted-syntax flags _id and z.date selectors', async () => {
+		await withOxlintProject(
+			join(fixturesDirectory, 'restricted-syntax.ts'),
+			'restricted-syntax.ts',
+			['common'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(result.exitCode).toBe(1);
+				expectRule(result.stdout, 'no-restricted-syntax');
+				const messages = diagnostics(result.stdout).map(({ message }) => message);
+				expect(messages.some((message) => message.includes('Do not use _id as a property'))).toBeTrue();
+				expect(messages.some((message) => message.includes('Do not access ._id'))).toBeTrue();
+				expect(messages.some((message) => message.includes('instead of z.date()'))).toBeTrue();
+				expect(messages.some((message) => message.includes('instead of z.coerce.date() alone'))).toBeTrue();
+			},
+			{
+				rules: {
+					'mahir-restricted-syntax/no-restricted-syntax': [
+						2,
+						{ selector: "Property[key.name='_id']", message: 'Do not use _id as a property in objects.' },
+						{ selector: "MemberExpression[property.name='_id']", message: 'Do not access ._id' },
+						{
+							selector: "CallExpression[callee.object.name='z'][callee.property.name='date']",
+							message: 'Use z.coerce.date().meta({ type: "string", format: "date-time" }) instead of z.date()',
+						},
+						{
+							selector:
+								"CallExpression[callee.object.object.name='z'][callee.object.property.name='coerce'][callee.property.name='date']:not([parent.type='MemberExpression'][parent.property.name='meta'])",
+							message:
+								'Use z.coerce.date().meta({ type: "string", format: "date-time" }) instead of z.coerce.date() alone',
+						},
+					],
+				},
+			},
+		);
+	});
+
+	test('node no-restricted-globals reports Buffer and process with node: messages', async () => {
+		await withOxlintProject(join(fixturesDirectory, 'node-globals.ts'), 'node-globals.ts', ['node'], async (project) => {
+			const result = await runOxlint(project);
+			expect(result.exitCode).toBe(1);
+			expectRule(result.stdout, 'no-restricted-globals');
+			const messages = diagnostics(result.stdout).map(({ message }) => message);
+			expect(messages.some((message) => message.includes('node:buffer'))).toBeTrue();
+			expect(messages.some((message) => message.includes('node:process'))).toBeTrue();
 		});
 	});
 

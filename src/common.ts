@@ -1,15 +1,14 @@
 import { defineConfig } from 'oxlint';
 
-import { nativePlugins, packagePlugin } from './config.js';
+import { localPlugin, nativePlugins, packagePlugin } from './config.js';
 
 import type { OxlintConfig } from 'oxlint';
 
 const rules: NonNullable<OxlintConfig['rules']> = {
 	'array-callback-return': 2,
-	'eslint-js/arrow-body-style': [2, 'as-needed'],
+	'arrow-body-style': [2, 'as-needed'],
 	'block-scoped-var': 2,
 	'consistent-return': 2,
-	'eslint-js/consistent-this': [2, 'self'],
 	'constructor-super': 2,
 	curly: [2, 'multi-or-nest'],
 	'default-case': 2,
@@ -47,7 +46,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	],
 	'import/no-mutable-exports': 2,
 	'import/no-self-import': 2,
-	'import-js/no-useless-path-segments': 2,
 	'import/no-webpack-loader-syntax': 2,
 	'import-js/order': 0,
 	'no-alert': 2,
@@ -63,7 +61,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'no-control-regex': 2,
 	'no-debugger': 2,
 	'no-delete-var': 2,
-	'eslint-js/no-dupe-args': 2,
 	'no-dupe-class-members': 2,
 	'no-dupe-else-if': 2,
 	'no-dupe-keys': 2,
@@ -99,8 +96,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'no-new-wrappers': 2,
 	'no-nonoctal-decimal-escape': 2,
 	'no-obj-calls': 2,
-	'eslint-js/no-octal': 2,
-	'eslint-js/no-octal-escape': 2,
 	'no-promise-executor-return': 2,
 	'no-proto': 2,
 	'no-prototype-builtins': 2,
@@ -129,7 +124,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'no-this-before-super': 2,
 	'no-throw-literal': 2,
 	'no-undef': 2,
-	'eslint-js/no-undef-init': 2,
 	'no-unexpected-multiline': 2,
 	'no-unmodified-loop-condition': 2,
 	'no-unneeded-ternary': 2,
@@ -191,7 +185,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	radix: 2,
 	'require-yield': 2,
 	'sort-vars': 2,
-	'eslint-js/strict': [2, 'never'],
 	'symbol-description': 2,
 	'unicode-bom': [2, 'never'],
 	'unicorn/catch-error-name': [
@@ -206,13 +199,11 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'unicorn/escape-case': 2,
 	'unicorn/new-for-builtins': 2,
 	'unicorn/no-abusive-eslint-disable': 2,
-	'unicorn-js/no-for-each': 1,
+	'unicorn/no-array-for-each': 1,
 	'unicorn/no-array-method-this-argument': 2,
 	'unicorn/no-await-in-promise-methods': 2,
 	'unicorn/no-document-cookie': 2,
 	'unicorn/no-empty-file': 2,
-	'unicorn-js/no-for-loop': 2,
-	'unicorn-js/prefer-unicode-code-point-escapes': 2,
 	'unicorn/no-instanceof-array': 2,
 	'unicorn/no-invalid-remove-event-listener': 2,
 	'unicorn/no-lonely-if': 2,
@@ -227,7 +218,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'unicorn/no-typeof-undefined': 2,
 	'unicorn/no-unnecessary-await': 2,
 	'unicorn/no-unreadable-iife': 2,
-	'unicorn-js/no-unused-properties': 2,
 	'unicorn/no-useless-fallback-in-spread': 2,
 	'unicorn/no-useless-length-check': 2,
 	'unicorn/no-useless-promise-resolve-reject': 2,
@@ -281,7 +271,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'unicorn/require-array-join-separator': 2,
 	'unicorn/require-number-to-fixed-digits-argument': 2,
 	'unicorn/require-post-message-target-origin': 2,
-	'unicorn-js/template-indent': 2,
 	'unicorn/text-encoding-identifier-case': 2,
 	'unicorn/throw-new-error': 2,
 	'use-isnan': 2,
@@ -298,9 +287,8 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 const config = defineConfig({
 	plugins: nativePlugins,
 	jsPlugins: [
-		packagePlugin('eslint-js', 'oxlint-plugin-eslint'),
+		localPlugin('mahir-restricted-syntax', './plugins/restricted-syntax.js'),
 		packagePlugin('import-js', 'eslint-plugin-import-x'),
-		packagePlugin('unicorn-js', 'eslint-plugin-unicorn'),
 	],
 	categories: {
 		correctness: 'off',

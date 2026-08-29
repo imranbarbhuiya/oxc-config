@@ -3,7 +3,7 @@ type User = {
 };
 
 interface Formatter {
-	format(value: string): string;
+	format: (value: string) => string;
 }
 
 const values: Array<string> = [];

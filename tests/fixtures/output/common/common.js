@@ -4,7 +4,9 @@ function calculate() {
 
 	return total;
 }
-const doubled = (value) => value * 2;
+const doubled = (value) => 
+	value * 2
+;
 const objectValue = 1;
 const object = { objectValue };
 

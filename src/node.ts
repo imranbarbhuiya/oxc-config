@@ -20,13 +20,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 		},
 	],
 	'node-js/no-unpublished-bin': 2,
-	'node-js/prefer-global/buffer': [2, 'never'],
-	'node-js/prefer-global/console': [2, 'always'],
-	'node-js/prefer-global/process': [2, 'never'],
-	'node-js/prefer-global/text-decoder': [2, 'never'],
-	'node-js/prefer-global/text-encoder': [2, 'never'],
-	'node-js/prefer-global/url': [2, 'never'],
-	'node-js/prefer-global/url-search-params': [2, 'never'],
 	'node-js/process-exit-as-throw': 2,
 	'node-js/hashbang': [
 		2,
