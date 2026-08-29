@@ -113,13 +113,13 @@ Add scripts to `package.json`:
 - `edge` contains edge-runtime rules
 - `jsdoc` contains JSDoc rules
 - `tsdoc` contains TSDoc rules and includes JSDoc
-- `tailwind` contains Tailwind CSS rules and requires `eslint-plugin-better-tailwindcss`
+- `tailwind` contains Tailwind CSS rules
 - `i18n` contains next-intl rules
 - `native-tailwind` contains React Native Tailwind class-name rules
 - `central-icons` prevents barrel imports from `@central-icons-react*` packages
 - `api-error` requires allowed error classes in TanStack Query functions
 
-Fragments can be combined through `defineConfig({ extends: [...] })`. Install any JavaScript plugin required by an optional fragment or third-party config.
+Fragments can be combined through `defineConfig({ extends: [...] })`. The Tailwind plugin ships with this package. Install a third-party plugin only when you add it yourself, such as TanStack Query.
 
 TanStack Query can be added directly:
 

@@ -166,9 +166,6 @@ export default defineConfig({
 	extends: [${configs.join(', ')}],
 	ignorePatterns: [${ignores}],
 	env: ${env},
-	categories: {
-		correctness: 'off',
-	},
 	options: {
 		typeAware: true,
 	},${queryBlock}
@@ -251,12 +248,11 @@ async function updateScripts(packageJsonPath: string): Promise<void> {
 	await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, '\t') + '\n');
 }
 
-async function installDependencies(cwd: string, includeTailwind: boolean, includeQuery: boolean): Promise<string> {
+async function installDependencies(cwd: string, includeQuery: boolean): Promise<string> {
 	const pm = await detectPackageManager(cwd);
 	const pmName = pm?.name ?? 'npm';
 	const dependencies = [PACKAGE_NAME, 'oxlint', 'oxlint-tsgolint', 'oxfmt'];
 
-	if (includeTailwind) dependencies.push('eslint-plugin-better-tailwindcss');
 	if (includeQuery) dependencies.push('@tanstack/eslint-plugin-query');
 
 	p.log.info(`Detected package manager: ${pmName}`);
@@ -479,7 +475,7 @@ p.log.success('Created oxlint.config.ts and oxfmt.config.ts');
 await updateScripts(packageJsonPath);
 p.log.success('Updated package.json scripts');
 
-const pmName = await installDependencies(cwd, includeTailwind, includeQuery);
+const pmName = await installDependencies(cwd, includeQuery);
 const runPrefix = pmName === 'npm' ? 'npm run' : pmName;
 p.outro(`Setup complete! Run \`${runPrefix} lint && ${runPrefix} format\``);
 

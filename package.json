@@ -1,6 +1,6 @@
 {
 	"name": "@imranbarbhuiya/oxc-config",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Shared Oxlint and Oxfmt configs for JavaScript and TypeScript projects",
 	"keywords": [
 		"config",
@@ -27,81 +27,121 @@
 		"oxc-config": "dist/cli/index.js"
 	},
 	"files": [
-		"dist/**"
+		"dist"
 	],
 	"type": "module",
 	"exports": {
 		"./api-error": {
 			"types": "./dist/api-error.d.ts",
-			"import": "./dist/api-error.js"
+			"import": "./dist/api-error.js",
+			"default": "./dist/api-error.js"
 		},
 		"./central-icons": {
 			"types": "./dist/central-icons.d.ts",
-			"import": "./dist/central-icons.js"
+			"import": "./dist/central-icons.js",
+			"default": "./dist/central-icons.js"
 		},
 		"./common": {
 			"types": "./dist/common.d.ts",
-			"import": "./dist/common.js"
+			"import": "./dist/common.js",
+			"default": "./dist/common.js"
 		},
 		"./edge": {
 			"types": "./dist/edge.d.ts",
-			"import": "./dist/edge.js"
+			"import": "./dist/edge.js",
+			"default": "./dist/edge.js"
 		},
 		"./i18n": {
 			"types": "./dist/i18n.d.ts",
-			"import": "./dist/i18n.js"
+			"import": "./dist/i18n.js",
+			"default": "./dist/i18n.js"
 		},
 		"./jsdoc": {
 			"types": "./dist/jsdoc.d.ts",
-			"import": "./dist/jsdoc.js"
+			"import": "./dist/jsdoc.js",
+			"default": "./dist/jsdoc.js"
 		},
 		"./jsx": {
 			"types": "./dist/jsx.d.ts",
-			"import": "./dist/jsx.js"
+			"import": "./dist/jsx.js",
+			"default": "./dist/jsx.js"
 		},
 		"./module": {
 			"types": "./dist/module.d.ts",
-			"import": "./dist/module.js"
+			"import": "./dist/module.js",
+			"default": "./dist/module.js"
 		},
 		"./native": {
 			"types": "./dist/native.d.ts",
-			"import": "./dist/native.js"
+			"import": "./dist/native.js",
+			"default": "./dist/native.js"
 		},
 		"./native-tailwind": {
 			"types": "./dist/native-tailwind.d.ts",
-			"import": "./dist/native-tailwind.js"
+			"import": "./dist/native-tailwind.js",
+			"default": "./dist/native-tailwind.js"
 		},
 		"./nest": {
 			"types": "./dist/nest.d.ts",
-			"import": "./dist/nest.js"
+			"import": "./dist/nest.js",
+			"default": "./dist/nest.js"
 		},
 		"./next": {
 			"types": "./dist/next.d.ts",
-			"import": "./dist/next.js"
+			"import": "./dist/next.js",
+			"default": "./dist/next.js"
 		},
 		"./node": {
 			"types": "./dist/node.d.ts",
-			"import": "./dist/node.js"
+			"import": "./dist/node.js",
+			"default": "./dist/node.js"
 		},
 		"./react": {
 			"types": "./dist/react.d.ts",
-			"import": "./dist/react.js"
+			"import": "./dist/react.js",
+			"default": "./dist/react.js"
 		},
 		"./tsdoc": {
 			"types": "./dist/tsdoc.d.ts",
-			"import": "./dist/tsdoc.js"
+			"import": "./dist/tsdoc.js",
+			"default": "./dist/tsdoc.js"
 		},
 		"./typescript": {
 			"types": "./dist/typescript.d.ts",
-			"import": "./dist/typescript.js"
+			"import": "./dist/typescript.js",
+			"default": "./dist/typescript.js"
 		},
 		"./tailwind": {
 			"types": "./dist/tailwind.d.ts",
-			"import": "./dist/tailwind.js"
+			"import": "./dist/tailwind.js",
+			"default": "./dist/tailwind.js"
 		},
 		"./oxfmt": {
 			"types": "./dist/oxfmt.d.ts",
-			"import": "./dist/oxfmt.js"
+			"import": "./dist/oxfmt.js",
+			"default": "./dist/oxfmt.js"
+		}
+	},
+	"typesVersions": {
+		"*": {
+			"api-error": ["./dist/api-error.d.ts"],
+			"central-icons": ["./dist/central-icons.d.ts"],
+			"common": ["./dist/common.d.ts"],
+			"edge": ["./dist/edge.d.ts"],
+			"i18n": ["./dist/i18n.d.ts"],
+			"jsdoc": ["./dist/jsdoc.d.ts"],
+			"jsx": ["./dist/jsx.d.ts"],
+			"module": ["./dist/module.d.ts"],
+			"native": ["./dist/native.d.ts"],
+			"native-tailwind": ["./dist/native-tailwind.d.ts"],
+			"nest": ["./dist/nest.d.ts"],
+			"next": ["./dist/next.d.ts"],
+			"node": ["./dist/node.d.ts"],
+			"react": ["./dist/react.d.ts"],
+			"tsdoc": ["./dist/tsdoc.d.ts"],
+			"typescript": ["./dist/typescript.d.ts"],
+			"tailwind": ["./dist/tailwind.d.ts"],
+			"oxfmt": ["./dist/oxfmt.d.ts"]
 		}
 	},
 	"publishConfig": {

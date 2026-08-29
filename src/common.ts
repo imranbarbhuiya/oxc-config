@@ -313,6 +313,9 @@ const config = defineConfig({
 		packagePlugin('import-js', 'eslint-plugin-import-x'),
 		packagePlugin('unicorn-js', 'eslint-plugin-unicorn'),
 	],
+	categories: {
+		correctness: 'off',
+	},
 	options: {
 		reportUnusedDisableDirectives: 'warn',
 	},

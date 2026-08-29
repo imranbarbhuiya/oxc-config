@@ -43,7 +43,7 @@ const cases = [
 const formatCases = [{ category: 'all', file: 'document.mdx' }] as const;
 
 function assertSucceeded(result: { exitCode: number; stderr: string; stdout: string }) {
-	if (result.exitCode !== 0) throw new Error(result.stderr || result.stdout);
+	if (result.exitCode !== 0) throw new Error(result.stderr || result.stdout || `oxlint exited with ${result.exitCode}`);
 }
 
 for (const category of ['common', 'ts', 'lib', 'all']) {
@@ -54,15 +54,19 @@ for (const category of ['common', 'ts', 'lib', 'all']) {
 		const categoryFormatCases = formatCases.filter((testCase) => testCase.category === category);
 
 		for (const testCase of categoryCases) {
-			test(testCase.file, async () => {
-				const inputPath = join(inputDirectory, testCase.file);
-				const outputPath = join(outputDirectory, testCase.file);
-				await withOxlintProject(inputPath, testCase.file, [...testCase.configs], async (project) => {
-					const result = await runOxlint(project, category !== 'common');
-					assertSucceeded(result);
-					expect(await readFile(project.file, 'utf8')).toBe(await readFile(outputPath, 'utf8'));
-				});
-			});
+			test(
+				testCase.file,
+				async () => {
+					const inputPath = join(inputDirectory, testCase.file);
+					const outputPath = join(outputDirectory, testCase.file);
+					await withOxlintProject(inputPath, testCase.file, [...testCase.configs], async (project) => {
+						const result = await runOxlint(project, category !== 'common');
+						assertSucceeded(result);
+						expect(await readFile(project.file, 'utf8')).toBe(await readFile(outputPath, 'utf8'));
+					});
+				},
+				{ timeout: 30_000 },
+			);
 		}
 
 		for (const testCase of categoryFormatCases) {

@@ -15,9 +15,6 @@ export default defineConfig({
 		Bun: 'readonly',
 		Response: 'readonly',
 	},
-	categories: {
-		correctness: 'off',
-	},
 	options: {
 		typeAware: true,
 	},
