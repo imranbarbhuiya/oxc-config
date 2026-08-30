@@ -150,8 +150,9 @@ const requireApiError = defineRule({
 				prop.key.type !== 'Identifier' ||
 				(prop.key.name !== 'queryFn' && prop.key.name !== 'mutationFn') ||
 				prop.value.type !== 'Identifier'
-			)
+			) {
 				return;
+			}
 			extractedRefs.push({ name: prop.value.name, fnType: prop.key.name });
 		}
 
@@ -174,8 +175,9 @@ const requireApiError = defineRule({
 				if (
 					node.id.type === 'Identifier' &&
 					(node.init?.type === 'ArrowFunctionExpression' || node.init?.type === 'FunctionExpression')
-				)
+				) {
 					recordModuleFn(node.id.name, node.init.body);
+				}
 			},
 			ArrowFunctionExpression: enterQueryOrMutationFn,
 			'ArrowFunctionExpression:exit': exitQueryOrMutationFn,

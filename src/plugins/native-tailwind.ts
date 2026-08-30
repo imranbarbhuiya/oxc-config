@@ -121,8 +121,9 @@ const classNameRules = defineRule({
 					attr.value?.type === 'JSXExpressionContainer' &&
 					attr.value.expression.type === 'Literal' &&
 					typeof attr.value.expression.value === 'string'
-				)
+				) {
 					reportAndFix(attr.value.expression, attr.value.expression.value, attr.value.expression.raw);
+				}
 			},
 		};
 	},

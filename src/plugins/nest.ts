@@ -12,8 +12,9 @@ function isSortable(
 
 function nodeName(node: ESTree.CallExpression | ESTree.IdentifierName | ESTree.IdentifierReference) {
 	if (node.type === 'Identifier') return node.name;
-	if (node.callee.type === 'MemberExpression' && node.callee.object.type === 'Identifier')
+	if (node.callee.type === 'MemberExpression' && node.callee.object.type === 'Identifier') {
 		return node.callee.object.name;
+	}
 	return '';
 }
 

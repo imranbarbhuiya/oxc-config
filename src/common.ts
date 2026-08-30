@@ -10,7 +10,11 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'block-scoped-var': 2,
 	'consistent-return': 2,
 	'constructor-super': 2,
-	curly: [2, 'multi-or-nest'],
+	// `multi-line` is the only option that leaves line breaking to oxfmt. Under `multi-or-nest` a
+	// single statement longer than `printWidth` gets wrapped in braces by the formatter, and the
+	// linter then asks for those braces back, so the two never agree. This still catches what the
+	// rule is for, a body sitting on its own line without braces.
+	curly: [2, 'multi-line'],
 	'default-case': 2,
 	'default-case-last': 2,
 	'default-param-last': 2,

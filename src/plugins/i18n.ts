@@ -17,8 +17,9 @@ const staticTArguments = defineRule({
 				if (node.callee.type !== 'Identifier' || node.callee.name !== 't') return;
 				if (node.arguments.length === 0) return;
 				const firstArg = node.arguments[0];
-				if (firstArg.type !== 'Literal' || typeof firstArg.value !== 'string')
+				if (firstArg.type !== 'Literal' || typeof firstArg.value !== 'string') {
 					context.report({ node: firstArg, messageId: 'staticArgument' });
+				}
 			},
 		};
 	},
@@ -38,16 +39,18 @@ const noTAsParameter = defineRule({
 	createOnce(context) {
 		return {
 			CallExpression(node) {
-				for (const arg of node.arguments)
+				for (const arg of node.arguments) {
 					if (arg.type === 'Identifier' && arg.name === 't') context.report({ node: arg, messageId: 'noTParam' });
+				}
 			},
 			JSXAttribute(node) {
 				if (
 					node.value?.type === 'JSXExpressionContainer' &&
 					node.value.expression.type === 'Identifier' &&
 					node.value.expression.name === 't'
-				)
+				) {
 					context.report({ node: node.value.expression, messageId: 'noTParam' });
+				}
 			},
 		};
 	},
