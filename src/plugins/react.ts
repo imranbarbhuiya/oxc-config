@@ -59,17 +59,16 @@ function memberName(member: ESTree.TSPropertySignature) {
 }
 
 function patternType(pattern: ESTree.Node): ESTree.TSType | undefined {
-	if (!('typeAnnotation' in pattern) || pattern.typeAnnotation == null || typeof pattern.typeAnnotation !== 'object') {
-		return undefined;
-	}
-	const annotation = pattern.typeAnnotation as ESTree.TSTypeAnnotation;
-	if (annotation.type !== 'TSTypeAnnotation') return undefined;
+	if (!('typeAnnotation' in pattern)) return undefined;
+	const annotation = pattern.typeAnnotation;
+	if (annotation === undefined || annotation === null || typeof annotation !== 'object') return undefined;
+	if (!('type' in annotation) || annotation.type !== 'TSTypeAnnotation') return undefined;
 	return annotation.typeAnnotation;
 }
 
 function paramType(fn: ESTree.Function | ESTree.ArrowFunctionExpression) {
-	const [param] = fn.params;
-	if (param == null) return undefined;
+	if (fn.params.length === 0) return undefined;
+	const param = fn.params[0];
 	if (param.type === 'TSParameterProperty') return patternType(param.parameter);
 	if (param.type === 'RestElement') return undefined;
 	if (param.type === 'AssignmentPattern') return patternType(param.left);
@@ -212,7 +211,7 @@ const noInvalidHtmlAttribute = defineRule({
 					context.report({ node: node.name, messageId: 'onlyMeaningfulFor' });
 					return;
 				}
-				if (node.value == null) {
+				if (node.value === null) {
 					context.report({ node: node.name, messageId: 'emptyIsMeaningless' });
 					return;
 				}
@@ -225,7 +224,7 @@ const noInvalidHtmlAttribute = defineRule({
 				) {
 					literal = node.value.expression;
 				}
-				if (literal == null) return;
+				if (literal === undefined) return;
 				if (!literal.value.trim()) {
 					context.report({ node: literal, messageId: 'emptyIsMeaningless' });
 					return;
@@ -233,7 +232,7 @@ const noInvalidHtmlAttribute = defineRule({
 				const values = literal.value.trim().split(/\s+/);
 				for (const value of values) {
 					const allowed = REL_VALUES.get(value);
-					if (allowed == null) {
+					if (allowed === undefined) {
 						context.report({ node: literal, messageId: 'neverValid', data: { value } });
 						continue;
 					}
@@ -292,7 +291,7 @@ const preferReadOnlyProps = defineRule({
 			if (seen.has(name)) return;
 			seen.add(name);
 			const resolved = types.get(name);
-			if (resolved == null) return;
+			if (resolved === undefined) return;
 			if (resolved.type === 'TSInterfaceBody') checkMembers(resolved.body);
 			else checkType(resolved, seen);
 		}
