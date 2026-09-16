@@ -1,6 +1,6 @@
 import { defineConfig } from 'oxlint';
 
-import { nativePlugins, packagePlugin } from './config.js';
+import { localPlugin, nativePlugins } from './config.js';
 
 import type { OxlintConfig } from 'oxlint';
 
@@ -57,50 +57,16 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'react/no-unknown-property': 2,
 	'react/no-unstable-nested-components': 2,
 	'react/void-dom-elements-no-children': 2,
-	'react-js/boolean-prop-naming': 2,
-	'react-js/jsx-closing-bracket-location': [2, 'line-aligned'],
-	'react-js/jsx-closing-tag-location': 2,
-	'react-js/jsx-equals-spacing': [2, 'never'],
-	'react-js/jsx-first-prop-new-line': [2, 'multiline-multiprop'],
-	'react-js/jsx-max-props-per-line': [
-		2,
-		{
-			maximum: 3,
-			when: 'multiline',
-		},
-	],
-	'react-js/jsx-newline': [
-		2,
-		{
-			prevent: true,
-		},
-	],
-	'react-js/jsx-no-bind': [
-		2,
-		{
-			allowArrowFunctions: true,
-			allowBind: false,
-			ignoreRefs: true,
-		},
-	],
-	'react-js/jsx-sort-props': 2,
-	'react-js/jsx-tag-spacing': [
-		2,
-		{
-			afterOpening: 'never',
-			beforeSelfClosing: 'always',
-			closingSlash: 'never',
-		},
-	],
-	'react-js/no-deprecated': 2,
-	'react-js/no-invalid-html-attribute': 2,
-	'react-js/prefer-read-only-props': 2,
+	'mahir-react/jsx-newline': 2,
+	'mahir-react/jsx-sort-props': 2,
+	'mahir-react/no-invalid-html-attribute': 2,
+	'mahir-react/prefer-read-only-props': 2,
 	'unicorn/consistent-function-scoping': 0,
 };
 
 const config = defineConfig({
 	plugins: nativePlugins,
-	jsPlugins: [packagePlugin('react-js', 'eslint-plugin-react')],
+	jsPlugins: [localPlugin('mahir-react', './plugins/react.js')],
 	env: {
 		browser: true,
 		serviceworker: true,

@@ -245,6 +245,19 @@ describe('custom configs', () => {
 		);
 	});
 
+	test('react local plugin sorts props, drops jsx blank lines, and flags rel / mutable props', async () => {
+		await withOxlintProject(join(fixturesDirectory, 'react.ts'), 'react.tsx', ['react'], async (project) => {
+			const result = await runOxlint(project);
+			expect(result.exitCode).toBe(1);
+			expectRule(result.stdout, 'no-invalid-html-attribute');
+			const source = await readFile(project.file, 'utf8');
+			expect(source).toContain('readonly title: string');
+			expect(source).toContain('<input name="q" value="x" />');
+			expect(source).not.toContain('<input value="x" name="q" />');
+			expect(source).not.toMatch(/<input[\s\S]*\n\n[\s\S]*<a /);
+		});
+	});
+
 	test('tailwind fixes unnecessary class whitespace', async () => {
 		await withOxlintProject(join(fixturesDirectory, 'tailwind.tsx'), 'tailwind.tsx', ['tailwind'], async (project) => {
 			await mkdir(join(project.directory, 'app'), { recursive: true });
