@@ -50,9 +50,6 @@
 			"jsdoc": [
 				"./dist/jsdoc.d.ts"
 			],
-			"jsx": [
-				"./dist/jsx.d.ts"
-			],
 			"module": [
 				"./dist/module.d.ts"
 			],
@@ -118,11 +115,6 @@
 			"types": "./dist/jsdoc.d.ts",
 			"import": "./dist/jsdoc.js",
 			"default": "./dist/jsdoc.js"
-		},
-		"./jsx": {
-			"types": "./dist/jsx.d.ts",
-			"import": "./dist/jsx.js",
-			"default": "./dist/jsx.js"
 		},
 		"./module": {
 			"types": "./dist/module.d.ts",

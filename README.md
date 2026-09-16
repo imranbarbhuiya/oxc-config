@@ -106,8 +106,7 @@ Add scripts to `package.json`:
 - `node` contains Node.js rules
 - `module` contains ECMAScript module rules
 - `typescript` contains TypeScript and type-aware rules
-- `jsx` contains JSX rules
-- `react` contains React rules and includes JSX
+- `react` contains React and JSX rules
 - `native` contains React Native rules and includes React
 - `next` contains Next.js rules
 - `edge` contains edge-runtime rules
