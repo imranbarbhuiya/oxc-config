@@ -258,6 +258,18 @@ describe('custom configs', () => {
 		});
 	});
 
+	test('react prefer-read-only-props does not leak components into later files', async () => {
+		await withOxlintProject(join(fixturesDirectory, 'react.ts'), 'react.tsx', ['react'], async (project) => {
+			const plain = join(project.directory, 'plain.ts');
+			await Bun.write(plain, 'export const value = 1;\n');
+			const result = await runOxlint(project, false, [project.file, plain], ['--threads', '1']);
+			const leaked = (JSON.parse(result.stdout) as { diagnostics: { filename: string }[] }).diagnostics.filter(
+				({ filename }) => filename.endsWith('plain.ts'),
+			);
+			expect(leaked).toEqual([]);
+		});
+	});
+
 	test('tailwind fixes unnecessary class whitespace', async () => {
 		await withOxlintProject(join(fixturesDirectory, 'tailwind.tsx'), 'tailwind.tsx', ['tailwind'], async (project) => {
 			await mkdir(join(project.directory, 'app'), { recursive: true });

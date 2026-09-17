@@ -296,6 +296,10 @@ const preferReadOnlyProps = defineRule({
 			else checkType(resolved, seen);
 		}
 		return {
+			before() {
+				types.clear();
+				jsxFns.clear();
+			},
 			TSTypeAliasDeclaration(node) {
 				types.set(node.id.name, node.typeAnnotation);
 			},

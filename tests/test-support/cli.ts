@@ -103,17 +103,17 @@ export async function withOxfmtProject<T>(
 	}
 }
 
-export async function runOxlint(project: Project, typeAware = false) {
+export async function runOxlint(project: Project, typeAware = false, targets = [project.file], extraArgs = ['--fix']) {
 	const command = [
 		'node',
 		oxlintBin,
 		'--config',
 		join(project.directory, 'oxlint.config.mjs'),
-		'--fix',
+		...extraArgs,
 		'--format',
 		'json',
 		...(typeAware ? ['--type-aware'] : []),
-		project.file,
+		...targets,
 	];
 	let result = await run(command, project.directory);
 	for (let attempt = 0; attempt < 4 && result.exitCode !== 0; attempt++) {
