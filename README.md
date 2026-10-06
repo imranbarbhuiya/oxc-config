@@ -58,12 +58,11 @@ npm install --save-dev @imranbarbhuiya/oxc-config oxlint oxlint-tsgolint oxfmt
 Create `oxlint.config.ts`:
 
 ```ts
-import { defineConfig } from 'oxlint';
-
 import common from '@imranbarbhuiya/oxc-config/common';
 import module from '@imranbarbhuiya/oxc-config/module';
 import node from '@imranbarbhuiya/oxc-config/node';
 import typescript from '@imranbarbhuiya/oxc-config/typescript';
+import { defineConfig } from 'oxlint';
 
 export default defineConfig({
 	extends: [common, node, typescript, module],
@@ -78,9 +77,8 @@ export default defineConfig({
 Create `oxfmt.config.ts`:
 
 ```ts
-import { defineConfig } from 'oxfmt';
-
 import config from '@imranbarbhuiya/oxc-config/oxfmt';
+import { defineConfig } from 'oxfmt';
 
 export default defineConfig({
 	...config,
@@ -123,10 +121,9 @@ Fragments can be combined through `defineConfig({ extends: [...] })`. The Tailwi
 TanStack Query can be added directly:
 
 ```ts
-import { defineConfig } from 'oxlint';
-
 import common from '@imranbarbhuiya/oxc-config/common';
 import react from '@imranbarbhuiya/oxc-config/react';
+import { defineConfig } from 'oxlint';
 
 export default defineConfig({
 	extends: [common, react],
