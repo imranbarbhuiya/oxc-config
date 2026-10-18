@@ -1,3 +1,4 @@
+import { isAbsolute, matchesGlob, relative } from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 
 import type { ExternalPluginEntry, OxlintConfig } from 'oxlint';
@@ -21,4 +22,10 @@ export function packagePlugin(name: string, specifier: string): ExternalPluginEn
 
 export function localPlugin(name: string, path: string): ExternalPluginEntry {
 	return { name, specifier: fileURLToPath(new URL(path, import.meta.url)) };
+}
+
+export function matchesFileGlob(context: { cwd: string; filename: string }, patterns: readonly string[]) {
+	const fromCwd = relative(context.cwd, context.filename);
+	const file = (fromCwd.startsWith('..') || isAbsolute(fromCwd) ? context.filename : fromCwd).replaceAll('\\', '/');
+	return patterns.some((pattern) => matchesGlob(file, pattern));
 }

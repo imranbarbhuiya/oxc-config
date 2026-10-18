@@ -280,3 +280,208 @@ describe('custom configs', () => {
 		});
 	});
 });
+
+const effectFixtures = join(import.meta.dir, 'fixtures/effect');
+const unistylesFixtures = join(import.meta.dir, 'fixtures/unistyles');
+
+function ruleLines(stdout: string, rule: string) {
+	return (JSON.parse(stdout) as { diagnostics: (Diagnostic & { labels: { span: { line: number } }[] })[] }).diagnostics
+		.filter(({ code }) => code.includes(rule))
+		.map(({ labels }) => labels[0]?.span.line);
+}
+
+describe('effect', () => {
+	test('idiomatic Effect v4 code has no diagnostics under common, typescript, node, module and effect', async () => {
+		await withOxlintProject(
+			join(effectFixtures, 'valid.ts'),
+			'src/valid.ts',
+			['common', 'typescript', 'node', 'module', 'effect'],
+			async (project) => {
+				const result = await runOxlint(project, true, [project.file], []);
+				expect(diagnostics(result.stdout)).toEqual([]);
+				expect(result.exitCode).toBe(0);
+			},
+		);
+	});
+
+	test('no-gen-wrapper flags reusable functions that only return Effect.gen', async () => {
+		await withOxlintProject(
+			join(effectFixtures, 'no-gen-wrapper.ts'),
+			'src/wrapper.ts',
+			['effect'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(ruleLines(result.stdout, 'no-gen-wrapper')).toEqual([3, 8, 15]);
+			},
+		);
+	});
+
+	test('fn-name-matches fixes span names that do not match the binding', async () => {
+		await withOxlintProject(join(effectFixtures, 'fn-name-matches.ts'), 'src/names.ts', ['effect'], async (project) => {
+			const result = await runOxlint(project);
+			expect(result.exitCode).toBe(0);
+			const source = await readFile(project.file, 'utf8');
+			expect(source).toContain("export const findUser = Effect.fn('findUser')");
+			expect(source).toContain("query: Effect.fn('Database.query')");
+			expect(source).toContain("Effect.fn('matching')");
+			expect(source).toContain("Effect.fn('Service.qualified')");
+		});
+	});
+
+	test('return-yield-error adds return before yielded errors', async () => {
+		await withOxlintProject(
+			join(effectFixtures, 'return-yield-error.ts'),
+			'src/errors.ts',
+			['effect'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(result.exitCode).toBe(0);
+				const source = await readFile(project.file, 'utf8');
+				expect(source).toContain('return yield* new NotFound({ id });');
+				expect(source).toContain('return yield* Effect.fail(new NotFound({ id }));');
+				expect(source).toContain('\tyield* Effect.log(id);');
+			},
+		);
+	});
+
+	test('no-pipe-on-fn flags .pipe on Effect.fn and Effect.fnUntraced', async () => {
+		await withOxlintProject(join(effectFixtures, 'no-pipe-on-fn.ts'), 'src/pipe.ts', ['effect'], async (project) => {
+			const result = await runOxlint(project);
+			expect(ruleLines(result.stdout, 'no-pipe-on-fn')).toEqual([5, 9]);
+		});
+	});
+
+	test('no-throw-in-gen flags throw directly inside Effect generators only', async () => {
+		await withOxlintProject(join(effectFixtures, 'no-throw-in-gen.ts'), 'src/throw.ts', ['effect'], async (project) => {
+			const result = await runOxlint(project);
+			expect(ruleLines(result.stdout, 'no-throw-in-gen')).toEqual([5, 9]);
+		});
+	});
+
+	test('no-run-outside-edge flags Effect.run* outside entrypoints, tests and scripts', async () => {
+		const source = join(effectFixtures, 'no-run-outside-edge.ts');
+		await withOxlintProject(source, 'src/service.ts', ['effect'], async (project) => {
+			const result = await runOxlint(project);
+			expect(ruleLines(result.stdout, 'no-run-outside-edge')).toEqual([5, 6, 7]);
+		});
+		for (const file of ['src/main.ts', 'src/service.test.ts', 'scripts/seed.ts']) {
+			await withOxlintProject(source, file, ['effect'], async (project) => {
+				const result = await runOxlint(project);
+				expect(ruleLines(result.stdout, 'no-run-outside-edge')).toEqual([]);
+			});
+		}
+		await withOxlintProject(
+			source,
+			'src/main.ts',
+			['effect'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(ruleLines(result.stdout, 'no-run-outside-edge')).toEqual([5, 6, 7]);
+			},
+			{ rules: { 'mahir-effect/no-run-outside-edge': [2, { allow: ['**/bin/**'] }] } },
+		);
+	});
+
+	test('effect restricts v3-era import paths and keeps v4 paths', async () => {
+		await withOxlintProject(join(effectFixtures, 'imports.ts'), 'src/imports.ts', ['effect'], async (project) => {
+			const result = await runOxlint(project);
+			expect(ruleLines(result.stdout, 'no-restricted-imports').toSorted((left, right) => left - right)).toEqual([
+				1, 2, 4, 5, 6, 7, 9, 11,
+			]);
+		});
+	});
+
+	test('effect bans process.env except in scripts', async () => {
+		const source = join(effectFixtures, 'process-env.ts');
+		await withOxlintProject(source, 'src/env.ts', ['node', 'effect'], async (project) => {
+			const result = await runOxlint(project);
+			expect(ruleLines(result.stdout, 'no-process-env')).toEqual([3]);
+		});
+		await withOxlintProject(source, 'scripts/env.ts', ['node', 'effect'], async (project) => {
+			const result = await runOxlint(project);
+			expect(ruleLines(result.stdout, 'no-process-env')).toEqual([]);
+		});
+	});
+
+	test('effect-types-only allows type imports and bans value imports', async () => {
+		await withOxlintProject(
+			join(effectFixtures, 'types-only.ts'),
+			'src/ui.ts',
+			['effect-types-only'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(ruleLines(result.stdout, 'no-restricted-imports').toSorted((left, right) => left - right)).toEqual([
+					1, 2, 4,
+				]);
+				expect(diagnostics(result.stdout).every(({ message }) => !message.includes('effect/Result'))).toBeTrue();
+			},
+		);
+	});
+});
+
+describe('unistyles', () => {
+	test('idiomatic Unistyles code has no diagnostics under the native stack', async () => {
+		await withOxlintProject(
+			join(unistylesFixtures, 'valid.tsx'),
+			'src/Card.tsx',
+			['common', 'node', 'typescript', 'module', 'react', 'native', 'unistyles'],
+			async (project) => {
+				const result = await runOxlint(project, false, [project.file], []);
+				expect(diagnostics(result.stdout)).toEqual([]);
+			},
+		);
+	});
+
+	test('stylesheet-import moves StyleSheet to react-native-unistyles', async () => {
+		await withOxlintProject(
+			join(unistylesFixtures, 'stylesheet-import.tsx'),
+			'src/Styles.tsx',
+			['unistyles'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(result.exitCode).toBe(0);
+				const source = await readFile(project.file, 'utf8');
+				expect(source).toStartWith(
+					"import { Text } from 'react-native';\nimport { useUnistyles, StyleSheet } from 'react-native-unistyles';\n",
+				);
+			},
+		);
+	});
+
+	test('no-raw-colors flags colour literals in styles outside theme files', async () => {
+		const source = join(unistylesFixtures, 'no-raw-colors.tsx');
+		await withOxlintProject(source, 'src/Label.tsx', ['unistyles'], async (project) => {
+			const result = await runOxlint(project);
+			expect(ruleLines(result.stdout, 'no-raw-colors')).toEqual([6, 7, 8, 15]);
+		});
+		await withOxlintProject(source, 'src/theme/Label.tsx', ['unistyles'], async (project) => {
+			const result = await runOxlint(project);
+			expect(ruleLines(result.stdout, 'no-raw-colors')).toEqual([]);
+		});
+	});
+
+	test('no-inline-style-objects flags inline objects with literal values', async () => {
+		await withOxlintProject(
+			join(unistylesFixtures, 'no-inline-style-objects.tsx'),
+			'src/Box.tsx',
+			['unistyles'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(ruleLines(result.stdout, 'no-inline-style-objects')).toEqual([16, 17, 18]);
+			},
+		);
+	});
+
+	test('create-uses-theme warns on static StyleSheet.create in files that import the theme', async () => {
+		await withOxlintProject(
+			join(unistylesFixtures, 'create-uses-theme.tsx'),
+			'src/Title.tsx',
+			['unistyles'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(result.exitCode).toBe(0);
+				expect(ruleLines(result.stdout, 'create-uses-theme')).toEqual([6]);
+			},
+		);
+	});
+});

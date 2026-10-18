@@ -15,9 +15,11 @@ interface PresetConfig {
 interface ExtraConfigs {
 	apiError: boolean;
 	centralIcons: boolean;
+	effectTypesOnly: boolean;
 	i18n: boolean;
 	nativeTailwind: boolean;
 	query: boolean;
+	unistyles: boolean;
 }
 
 const PACKAGE_NAME = '@imranbarbhuiya/oxc-config';
@@ -47,6 +49,10 @@ const PRESETS: Record<string, PresetConfig> = {
 		configs: ['common', 'node', 'typescript', 'module', 'nest'],
 		description: 'NestJS application with TypeScript',
 	},
+	'effect-node': {
+		configs: ['common', 'node', 'typescript', 'module', 'effect'],
+		description: 'Effect v4 Node.js backend with TypeScript',
+	},
 };
 
 const DEFAULT_IGNORES: Record<string, string[]> = {
@@ -56,6 +62,7 @@ const DEFAULT_IGNORES: Record<string, string[]> = {
 	native: ['.github/**', '.yarn/**', 'node_modules/**', '.expo/**', 'android/**', 'ios/**'],
 	library: ['.github/**', '.yarn/**', 'node_modules/**', 'dist/**'],
 	nest: ['.github/**', '.yarn/**', 'node_modules/**', 'dist/**'],
+	'effect-node': ['.github/**', '.yarn/**', 'node_modules/**', 'dist/**'],
 };
 
 const PACKAGE_PRESET_MAP: Record<string, string> = {
@@ -63,9 +70,10 @@ const PACKAGE_PRESET_MAP: Record<string, string> = {
 	'react-native': 'native',
 	react: 'react',
 	'@nestjs/core': 'nest',
+	effect: 'effect-node',
 };
 
-const DETECTION_PRIORITY = ['next', 'react-native', 'react', '@nestjs/core'];
+const DETECTION_PRIORITY = ['next', 'react-native', 'react', '@nestjs/core', 'effect'];
 
 const { values: options } = parseArgs({
 	options: {
@@ -82,6 +90,9 @@ const { values: options } = parseArgs({
 		'no-api-error': { type: 'boolean', default: false },
 		query: { type: 'boolean', default: false },
 		'no-query': { type: 'boolean', default: false },
+		unistyles: { type: 'boolean', default: false },
+		'no-unistyles': { type: 'boolean', default: false },
+		'effect-types-only': { type: 'boolean', default: false },
 		yes: { type: 'boolean', short: 'y', default: false },
 		cwd: { type: 'string' },
 		help: { type: 'boolean', short: 'h', default: false },
@@ -98,7 +109,7 @@ Usage:
   npx @imranbarbhuiya/oxc-config [options]
 
 Options:
-  -p, --preset <name>  Preset to use (nextjs, react, node, native, library, nest)
+  -p, --preset <name>  Preset to use (nextjs, react, node, native, library, nest, effect-node)
   -t, --tailwind       Include Tailwind CSS support
   --no-tailwind        Exclude Tailwind CSS support
   --i18n               Include next-intl i18n rules (Next.js)
@@ -111,6 +122,9 @@ Options:
   --no-api-error       Exclude ApiError rules
   --query              Include TanStack Query rules
   --no-query           Exclude TanStack Query rules
+  --unistyles          Include Unistyles 3 rules (native, not with --native-tailwind)
+  --no-unistyles       Exclude Unistyles 3 rules
+  --effect-types-only  Allow only type imports from Effect (nextjs, react, native)
   -y, --yes            Skip prompts and use defaults
   --cwd <path>         Working directory (defaults to current directory)
   -h, --help           Show this help message
@@ -130,9 +144,11 @@ function generateOxlintConfig(preset: string, includeTailwind: boolean, extras: 
 	if (extras.nativeTailwind) configs.push('nativeTailwind');
 	if (extras.centralIcons) configs.push('centralIcons');
 	if (extras.apiError) configs.push('apiError');
+	if (extras.unistyles) configs.push('unistyles');
+	if (extras.effectTypesOnly) configs.push('effectTypesOnly');
 
 	const imports = configs.map((name) => {
-		const fragment = name === 'nativeTailwind' ? 'native-tailwind' : name;
+		const fragment = name.replaceAll(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 		return `import ${name} from '${PACKAGE_NAME}/${fragment}';`;
 	});
 
@@ -225,6 +241,10 @@ function hasTanstackQuery(dependencies: Record<string, string>): boolean {
 	return Boolean(dependencies['@tanstack/react-query']);
 }
 
+function hasUnistyles(dependencies: Record<string, string>): boolean {
+	return Boolean(dependencies['react-native-unistyles']);
+}
+
 function hasTailwind(dependencies: Record<string, string>): boolean {
 	return Boolean(dependencies.tailwindcss || dependencies.nativewind);
 }
@@ -305,6 +325,13 @@ let includeNativeTailwind = options['no-native-tailwind'] ? false : options['nat
 let includeCentralIcons = options['no-central-icons'] ? false : options['central-icons'] ? true : undefined;
 let includeApiError = options['no-api-error'] ? false : options['api-error'] ? true : undefined;
 let includeQuery = options['no-query'] ? false : options.query ? true : undefined;
+let includeUnistyles = options['no-unistyles'] ? false : options.unistyles ? true : undefined;
+let includeEffectTypesOnly = options['effect-types-only'] ? true : undefined;
+
+if (includeUnistyles && includeNativeTailwind) {
+	p.log.error('--unistyles and --native-tailwind cannot be used together.');
+	process.exit(1);
+}
 
 if (!preset) {
 	const detectedPreset = detectPresetFromDependencies(dependencies);
@@ -381,8 +408,24 @@ if (includeI18n === undefined) {
 	}
 }
 
+if (includeUnistyles === undefined) {
+	if (preset !== 'native' || includeNativeTailwind) includeUnistyles = false;
+	else if (skipPrompts) includeUnistyles = hasUnistyles(dependencies);
+	else {
+		const result = await p.confirm({
+			message: 'Include Unistyles 3 rules?',
+			initialValue: hasUnistyles(dependencies),
+		});
+		if (p.isCancel(result)) {
+			p.cancel('Operation cancelled.');
+			process.exit(0);
+		}
+		includeUnistyles = result;
+	}
+}
+
 if (includeNativeTailwind === undefined) {
-	if (preset !== 'native' || !includeTailwind) includeNativeTailwind = false;
+	if (preset !== 'native' || !includeTailwind || includeUnistyles) includeNativeTailwind = false;
 	else if (skipPrompts) includeNativeTailwind = true;
 	else {
 		const result = await p.confirm({
@@ -445,6 +488,22 @@ if (includeApiError === undefined) {
 	}
 }
 
+if (includeEffectTypesOnly === undefined) {
+	if (preset !== 'native' && preset !== 'react' && preset !== 'nextjs') includeEffectTypesOnly = false;
+	else if (skipPrompts) includeEffectTypesOnly = false;
+	else {
+		const result = await p.confirm({
+			message: 'Allow only type imports from Effect (no Effect runtime in the UI)?',
+			initialValue: false,
+		});
+		if (p.isCancel(result)) {
+			p.cancel('Operation cancelled.');
+			process.exit(0);
+		}
+		includeEffectTypesOnly = result;
+	}
+}
+
 p.log.step(`Setting up Oxlint and Oxfmt with preset: ${preset}`);
 if (includeTailwind) p.log.info('Including Tailwind CSS support');
 if (includeI18n) p.log.info('Including next-intl i18n rules');
@@ -452,6 +511,8 @@ if (includeNativeTailwind) p.log.info('Including React Native Tailwind className
 if (includeCentralIcons) p.log.info('Including central-icons barrel-import rules');
 if (includeQuery) p.log.info('Including TanStack Query rules');
 if (includeApiError) p.log.info('Including ApiError rules for queryFn/mutationFn');
+if (includeUnistyles) p.log.info('Including Unistyles 3 rules');
+if (includeEffectTypesOnly) p.log.info('Including Effect type-only import rules');
 
 const oxlintConfigPath = path.join(cwd, 'oxlint.config.ts');
 const oxfmtConfigPath = path.join(cwd, 'oxfmt.config.ts');
@@ -467,6 +528,8 @@ await fs.writeFile(
 		centralIcons: includeCentralIcons,
 		query: includeQuery,
 		apiError: includeApiError,
+		unistyles: includeUnistyles,
+		effectTypesOnly: includeEffectTypesOnly,
 	}),
 );
 await fs.writeFile(oxfmtConfigPath, generateOxfmtConfig());

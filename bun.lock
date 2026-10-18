@@ -19,6 +19,7 @@
         "@types/bun": "^1.4.2",
         "@types/node": "^26.6.4",
         "@typescript-eslint/utils": "^8.71.1",
+        "effect": "^4.0.5",
         "oxfmt": "^0.72.0",
         "oxlint": "^1.87.0",
         "oxlint-tsgolint": "^7.0.2003",
@@ -26,11 +27,13 @@
         "typescript": "6.0.3",
       },
       "peerDependencies": {
-        "oxfmt": "^0.72.0",
+        "effect": "^4.0.5",
+        "oxfmt": ">=0.72.0 <0.74.0",
         "oxlint": "^1.87.0",
         "oxlint-tsgolint": "^7.0.2003",
       },
       "optionalPeers": [
+        "effect",
         "oxfmt",
         "oxlint-tsgolint",
       ],
@@ -340,6 +343,8 @@
     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
 
     "dts-resolver": ["dts-resolver@3.0.0", "", { "peerDependencies": { "oxc-resolver": ">=11.0.0" }, "optionalPeers": ["oxc-resolver"] }, "sha512-1T1f+z+4tl9XD+m+0HBgWoL/nm0bOIffyWaUuUSBlFg/86IWvfx+wjNaO/ybU0AJzG9/Mi5hBUgGV6zCmWEN7Q=="],
+
+    "effect": ["effect@4.0.5", "", {}, "sha512-BY4/28NlpOd99yzmV741xbVGmp+1U7tks4oB7F/Png64bTa5tm5eCA6W0RiXsnuLDDoJpjfVSo4Dnq4BZb/89Q=="],
 
     "empathic": ["empathic@2.1.0", "", {}, "sha512-AnfC1ATldl49/cvZdLPDjBfrRNwbDO05aibiOtzQu3qtlbJtomNLhF30HEtn/7iBz50dlMECqATo3fG0LrdEgw=="],
 

@@ -8,6 +8,7 @@ Opinionated shared Oxlint and Oxfmt configuration for JavaScript and TypeScript 
 ## Requirements
 
 - Node.js 24
+- The `typescript` fragment loads `eslint-plugin-sonarjs`, which needs the TypeScript 5 or 6 JavaScript API. TypeScript 7 has no JavaScript API, so when you also need TypeScript 7 (for example for `@effect/tsgo`), keep `typescript@6` installed as `typescript` and install TypeScript 7 under an alias such as `"@typescript/native": "npm:typescript@7"`
 
 ## Quick setup
 
@@ -34,13 +35,15 @@ npx @imranbarbhuiya/oxc-config -p react -y
 
 Available options:
 
-- `-p, --preset <name>` selects `nextjs`, `react`, `node`, `native`, `library`, or `nest`
+- `-p, --preset <name>` selects `nextjs`, `react`, `node`, `native`, `library`, `nest`, or `effect-node`
 - `-t, --tailwind` / `--no-tailwind`
 - `--i18n` / `--no-i18n`
 - `--native-tailwind` / `--no-native-tailwind`
 - `--central-icons` / `--no-central-icons`
 - `--api-error` / `--no-api-error`
 - `--query` / `--no-query`
+- `--unistyles` / `--no-unistyles` (native only, cannot be combined with `--native-tailwind`)
+- `--effect-types-only` (Next.js, React and React Native)
 - `-y, --yes` skips prompts and uses detected defaults
 - `--cwd <path>` changes the target directory
 - `-h, --help` shows help
@@ -115,6 +118,9 @@ Add scripts to `package.json`:
 - `native-tailwind` contains React Native Tailwind class-name rules
 - `central-icons` prevents barrel imports from `@central-icons-react*` packages
 - `api-error` requires allowed error classes in TanStack Query functions
+- `effect` contains Effect v4 rules for backend code
+- `effect-types-only` allows only type imports from Effect, for UI packages
+- `unistyles` contains Unistyles 3 rules for React Native
 
 Fragments can be combined through `defineConfig({ extends: [...] })`. The Tailwind plugin ships with this package. Install a third-party plugin only when you add it yourself, such as TanStack Query.
 
@@ -135,6 +141,43 @@ export default defineConfig({
 	},
 });
 ```
+
+## Effect
+
+The `effect-node` CLI preset extends `common`, `node`, `typescript`, `module` and `effect`. Type diagnostics such as floating Effects and missing services come from `@effect/tsgo`; the `effect` fragment covers what it does not:
+
+- `mahir-effect/no-gen-wrapper` flags functions that only wrap and return `Effect.gen`. Use `Effect.fn("name")` or `Effect.fnUntraced`. Callbacks passed to combinators are not flagged
+- `mahir-effect/fn-name-matches` requires the `Effect.fn` name to match the binding, either `name` or `Service.name`, and fixes it
+- `mahir-effect/return-yield-error` requires `return yield*` before `yield* new SomeError(...)` and `yield* Effect.fail(...)`, and fixes it
+- `mahir-effect/no-pipe-on-fn` flags `.pipe` on `Effect.fn(...)(...)`; pass combinators as extra arguments instead
+- `mahir-effect/no-throw-in-gen` flags `throw` directly inside `Effect.gen` / `Effect.fn` / `Effect.fnUntraced` generators
+- `mahir-effect/no-run-outside-edge` flags `Effect.runPromise`, `runSync`, `runFork` and the other `run*` functions outside `**/main.ts`, `**/*.test.ts` and `**/scripts/**`
+- `no-restricted-imports` rejects v3-era paths: `effect/Either`, `effect/unstable/*`, `@effect/platform`, `@effect/schema`, `@effect/rpc`, `@effect/cluster`, `@effect/sql` and their subpaths
+- `node-js/no-process-env` rejects `process.env`; use `Config`. It is off under `**/scripts/**`
+
+The fragment also relaxes rules that fire on idiomatic Effect code: `func-names` ignores generators, `require-yield` and `unicorn/throw-new-error` are off, and `no-use-before-define` allows classes referenced from inner scopes, so errors can be declared after the services that use them.
+
+Change the allowed run files:
+
+```ts
+export default defineConfig({
+	extends: [common, node, typescript, module, effect],
+	rules: {
+		'mahir-effect/no-run-outside-edge': [2, { allow: ['**/main.ts', '**/bin/**'] }],
+	},
+});
+```
+
+`effect-types-only` is for UI packages that share types with an Effect backend but should not ship the Effect runtime. It sets `no-restricted-imports` for `effect`, `effect/*` and `@effect/*` with `allowTypeImports: true`. Do not combine it with `effect`, because both configure `no-restricted-imports` and the last one wins.
+
+## Unistyles
+
+The `unistyles` fragment replaces `tailwind` and `native-tailwind` in Unistyles 3 apps:
+
+- `mahir-unistyles/stylesheet-import` requires `StyleSheet` from `react-native-unistyles` instead of `react-native`, and fixes the import
+- `mahir-unistyles/no-raw-colors` flags hex, `rgb()`, `hsl()` and similar colour strings, plus named colours on colour properties, inside `StyleSheet.create(...)` and `style` props. Files under `**/theme/**` and `**/tokens/**` are skipped; change this with `{ allow: [...] }`
+- `mahir-unistyles/no-inline-style-objects` flags inline object literals in `style` and `*Style` props unless every value is a variable or member access such as `theme.colors.text`
+- `mahir-unistyles/create-uses-theme` warns when a file that imports the theme (an import from a `theme` or `tokens` path, an import whose name contains `theme`, or `useUnistyles`) calls `StyleSheet.create` with a plain object instead of `StyleSheet.create((theme, rt) => ({ ... }))`
 
 ## MDX
 

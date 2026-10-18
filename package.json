@@ -44,6 +44,12 @@
 			"edge": [
 				"./dist/edge.d.ts"
 			],
+			"effect": [
+				"./dist/effect.d.ts"
+			],
+			"effect-types-only": [
+				"./dist/effect-types-only.d.ts"
+			],
 			"i18n": [
 				"./dist/i18n.d.ts"
 			],
@@ -77,6 +83,9 @@
 			"typescript": [
 				"./dist/typescript.d.ts"
 			],
+			"unistyles": [
+				"./dist/unistyles.d.ts"
+			],
 			"tailwind": [
 				"./dist/tailwind.d.ts"
 			],
@@ -105,6 +114,16 @@
 			"types": "./dist/edge.d.ts",
 			"import": "./dist/edge.js",
 			"default": "./dist/edge.js"
+		},
+		"./effect": {
+			"types": "./dist/effect.d.ts",
+			"import": "./dist/effect.js",
+			"default": "./dist/effect.js"
+		},
+		"./effect-types-only": {
+			"types": "./dist/effect-types-only.d.ts",
+			"import": "./dist/effect-types-only.js",
+			"default": "./dist/effect-types-only.js"
 		},
 		"./i18n": {
 			"types": "./dist/i18n.d.ts",
@@ -161,6 +180,11 @@
 			"import": "./dist/typescript.js",
 			"default": "./dist/typescript.js"
 		},
+		"./unistyles": {
+			"types": "./dist/unistyles.d.ts",
+			"import": "./dist/unistyles.js",
+			"default": "./dist/unistyles.js"
+		},
 		"./tailwind": {
 			"types": "./dist/tailwind.d.ts",
 			"import": "./dist/tailwind.js",
@@ -199,6 +223,7 @@
 		"@types/bun": "^1.4.2",
 		"@types/node": "^26.6.4",
 		"@typescript-eslint/utils": "^8.71.1",
+		"effect": "^4.0.5",
 		"oxfmt": "^0.72.0",
 		"oxlint": "^1.87.0",
 		"oxlint-tsgolint": "^7.0.2003",
@@ -206,11 +231,15 @@
 		"typescript": "6.0.3"
 	},
 	"peerDependencies": {
-		"oxfmt": "^0.72.0",
+		"effect": "^4.0.5",
+		"oxfmt": ">=0.72.0 <0.74.0",
 		"oxlint": "^1.87.0",
 		"oxlint-tsgolint": "^7.0.2003"
 	},
 	"peerDependenciesMeta": {
+		"effect": {
+			"optional": true
+		},
 		"oxfmt": {
 			"optional": true
 		},
