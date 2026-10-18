@@ -291,7 +291,7 @@ function ruleLines(stdout: string, rule: string) {
 }
 
 describe('effect', () => {
-	test.each(['valid.ts', 'idioms.ts', 'idioms-resources.ts'])(
+	test.each(['valid.ts', 'idioms.ts', 'idioms-resources.ts', 'idioms-sql.ts'])(
 		'idiomatic Effect v4 code in %s has no diagnostics under common, typescript, node, module and effect',
 		async (fixture) => {
 			await withOxlintProject(
@@ -399,6 +399,25 @@ describe('effect', () => {
 				expect(ruleLines(result.stdout, 'no-run-outside-edge')).toEqual([5, 6, 7]);
 			},
 			{ rules: { 'mahir-effect/no-run-outside-edge': [2, { allow: ['**/bin/**'] }] } },
+		);
+	});
+
+	test('no-unsafe-sql flags non-constant text in sql.unsafe and sql.literal', async () => {
+		const source = join(effectFixtures, 'no-unsafe-sql.ts');
+		await withOxlintProject(source, 'src/repo.ts', ['effect'], async (project) => {
+			const result = await runOxlint(project);
+			expect(result.exitCode).toBe(1);
+			expect(ruleLines(result.stdout, 'no-unsafe-sql')).toEqual([6, 7, 8, 9, 11, 22]);
+		});
+		await withOxlintProject(
+			source,
+			'src/repo.ts',
+			['effect'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(ruleLines(result.stdout, 'no-unsafe-sql')).toEqual([31]);
+			},
+			{ rules: { 'mahir-effect/no-unsafe-sql': [2, { clientNames: ['db'] }] } },
 		);
 	});
 

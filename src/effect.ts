@@ -12,6 +12,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'mahir-effect/no-pipe-on-fn': 2,
 	'mahir-effect/no-run-outside-edge': 2,
 	'mahir-effect/no-throw-in-gen': 2,
+	'mahir-effect/no-unsafe-sql': 2,
 	'mahir-effect/return-yield-error': 2,
 	'no-restricted-imports': [
 		2,

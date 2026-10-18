@@ -11,6 +11,8 @@ const FN_METHODS = new Set(['fn', 'fnUntraced']);
 const FN_NAMED = new Set(['fn']);
 const GEN = new Set(['gen']);
 const GEN_OR_FN = new Set(['gen', ...FN_METHODS]);
+const DEFAULT_SQL_CLIENTS = ['sql'];
+const UNSAFE_SQL_METHODS = new Set(['literal', 'unsafe']);
 
 function isEffectMember(node: ESTree.Node, methods: Set<string>): node is ESTree.MemberExpression {
 	return (
@@ -277,6 +279,60 @@ const noRunOutsideEdge = defineRule({
 	},
 });
 
+function sqlClientName(node: ESTree.Node) {
+	if (node.type === 'Identifier') return node.name;
+	if (node.type === 'MemberExpression' && !node.computed && node.property.type === 'Identifier') {
+		return node.property.name;
+	}
+	return undefined;
+}
+
+const noUnsafeSql = defineRule({
+	meta: {
+		type: 'problem',
+		docs: {
+			description: 'Disallow non-constant SQL text in `sql.unsafe` and `sql.literal`',
+		},
+		schema: [
+			{
+				type: 'object',
+				additionalProperties: false,
+				properties: {
+					clientNames: {
+						type: 'array',
+						items: { type: 'string', minLength: 1 },
+						uniqueItems: true,
+					},
+				},
+			},
+		],
+		messages: {
+			dynamicSql:
+				'`{{client}}.{{method}}` with non-constant text can lead to SQL injection. Interpolate values in the `sql` tagged template and use `sql(identifier)` or a whitelist for identifiers and ORDER BY.',
+		},
+		defaultOptions: [{ clientNames: [...DEFAULT_SQL_CLIENTS] }],
+	},
+	createOnce(context) {
+		let clients = new Set(DEFAULT_SQL_CLIENTS);
+		return {
+			before() {
+				const options = context.options[0] as { clientNames?: string[] } | undefined;
+				clients = new Set(options?.clientNames ?? DEFAULT_SQL_CLIENTS);
+			},
+			CallExpression(node) {
+				const { callee } = node;
+				if (callee.type !== 'MemberExpression' || callee.computed || callee.property.type !== 'Identifier') return;
+				const method = callee.property.name;
+				if (!UNSAFE_SQL_METHODS.has(method)) return;
+				const client = sqlClientName(callee.object);
+				if (client === undefined || !clients.has(client)) return;
+				if (node.arguments.length === 0 || staticString(node.arguments[0]) !== undefined) return;
+				context.report({ node: node.arguments[0], messageId: 'dynamicSql', data: { client, method } });
+			},
+		};
+	},
+});
+
 function isEffectModule(source: string) {
 	return source === 'effect' || source.startsWith('effect/') || source.startsWith('@effect/');
 }
@@ -337,6 +393,7 @@ export default definePlugin({
 		'no-pipe-on-fn': noPipeOnFn,
 		'no-run-outside-edge': noRunOutsideEdge,
 		'no-throw-in-gen': noThrowInGen,
+		'no-unsafe-sql': noUnsafeSql,
 		'return-yield-error': returnYieldError,
 		'types-only-imports': typesOnlyImports,
 	},

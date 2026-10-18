@@ -152,6 +152,7 @@ The `effect-node` CLI preset extends `common`, `node`, `typescript`, `module` an
 - `mahir-effect/no-pipe-on-fn` flags `.pipe` on `Effect.fn(...)(...)`; pass combinators as extra arguments instead
 - `mahir-effect/no-throw-in-gen` flags `throw` directly inside `Effect.gen` / `Effect.fn` / `Effect.fnUntraced` generators
 - `mahir-effect/no-run-outside-edge` flags `Effect.runPromise`, `runSync`, `runFork` and the other `run*` functions outside `**/main.ts`, `**/*.test.ts` and `**/scripts/**`
+- `mahir-effect/no-unsafe-sql` flags `sql.unsafe(...)` and `sql.literal(...)` whose first argument is not a constant string (a string literal or a template literal without `${}`). Interpolate values in the tagged template (`` sql`... ${value}` ``) and use `sql(identifier)` or a whitelist for identifiers and `ORDER BY`. `sql.unsafe('SELECT $1', [value])` is allowed. The `clientNames` option (default `['sql']`) lists the client names it checks, matched against `name.unsafe` and `this.name.unsafe`
 - `no-restricted-imports` rejects v3-era paths: `effect/Either`, `effect/unstable/*`, `@effect/platform`, `@effect/schema`, `@effect/rpc`, `@effect/cluster`, `@effect/sql` and their subpaths
 - `node-js/no-process-env` rejects `process.env`; use `Config`. It is off under `**/scripts/**`
 
@@ -172,6 +173,17 @@ export default defineConfig({
 	extends: [common, node, typescript, module, effect],
 	rules: {
 		'mahir-effect/no-run-outside-edge': [2, { allow: ['**/main.ts', '**/bin/**'] }],
+	},
+});
+```
+
+Check SQL clients bound to other names:
+
+```ts
+export default defineConfig({
+	extends: [common, node, typescript, module, effect],
+	rules: {
+		'mahir-effect/no-unsafe-sql': [2, { clientNames: ['sql', 'db'] }],
 	},
 });
 ```
