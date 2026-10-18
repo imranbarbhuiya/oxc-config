@@ -155,7 +155,15 @@ The `effect-node` CLI preset extends `common`, `node`, `typescript`, `module` an
 - `no-restricted-imports` rejects v3-era paths: `effect/Either`, `effect/unstable/*`, `@effect/platform`, `@effect/schema`, `@effect/rpc`, `@effect/cluster`, `@effect/sql` and their subpaths
 - `node-js/no-process-env` rejects `process.env`; use `Config`. It is off under `**/scripts/**`
 
-The fragment also relaxes rules that fire on idiomatic Effect code: `func-names` ignores generators, `require-yield` and `unicorn/throw-new-error` are off, and `no-use-before-define` allows classes referenced from inner scopes, so errors can be declared after the services that use them.
+The fragment also turns off or relaxes rules that fire on idiomatic Effect code. Oxlint has no way to scope a rule to files that use Effect, so these apply to every file the fragment covers:
+
+- `no-redeclare` is off, so a schema and its type can share a name (`const UserId = Schema.String.pipe(Schema.brand('UserId'))` with `type UserId = typeof UserId.Type`). Oxlint has no TypeScript-aware variant that allows value and type pairs. Redeclared `let`, `const` and `class` bindings are still errors from the parser and TypeScript
+- `promise/prefer-await-to-callbacks`, `promise/prefer-await-to-then` and `unicorn/prefer-top-level-await` are off, because they flag `Effect.catch`, `Effect.catchTag`, `Effect.tapError` and `Stream.catch` as Promise chains or Node-style callbacks
+- `require-yield` and `unicorn/throw-new-error` are off
+- `func-names` ignores generators
+- `no-use-before-define` allows classes referenced from inner scopes, so errors can be declared after the services that use them
+
+Extend `effect` after `common` and `typescript` so these settings win.
 
 Change the allowed run files:
 
@@ -168,7 +176,16 @@ export default defineConfig({
 });
 ```
 
-`effect-types-only` is for UI packages that share types with an Effect backend but should not ship the Effect runtime. It sets `no-restricted-imports` for `effect`, `effect/*` and `@effect/*` with `allowTypeImports: true`. Do not combine it with `effect`, because both configure `no-restricted-imports` and the last one wins.
+`effect-types-only` is for UI packages that share types with an Effect backend but should not ship the Effect runtime. `mahir-effect/types-only-imports` flags value imports, value re-exports and dynamic imports of `effect`, `effect/*` and `@effect/*`. `import type`, `export type` and inline `type` specifiers are allowed. It does not use `no-restricted-imports`, so you can add your own entries:
+
+```ts
+export default defineConfig({
+	extends: [common, typescript, module, native, effectTypesOnly],
+	rules: {
+		'no-restricted-imports': [2, { paths: [{ name: 'react-native', importNames: ['Image'] }] }],
+	},
+});
+```
 
 ## Unistyles
 

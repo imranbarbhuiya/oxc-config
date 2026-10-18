@@ -277,6 +277,56 @@ const noRunOutsideEdge = defineRule({
 	},
 });
 
+function isEffectModule(source: string) {
+	return source === 'effect' || source.startsWith('effect/') || source.startsWith('@effect/');
+}
+
+function isTypeOnly(
+	kind: string | undefined,
+	specifiers: readonly { type: string; importKind?: string; exportKind?: string }[],
+) {
+	if (kind === 'type') return true;
+	return (
+		specifiers.length > 0 &&
+		specifiers.every((specifier) => specifier.importKind === 'type' || specifier.exportKind === 'type')
+	);
+}
+
+const typesOnlyImports = defineRule({
+	meta: {
+		type: 'problem',
+		docs: {
+			description: 'Allow only type imports from `effect`, `effect/*` and `@effect/*`',
+		},
+		messages: {
+			valueImport:
+				'`{{source}}` is a runtime import. This package must not ship the Effect runtime; use `import type` or inline `type` specifiers.',
+		},
+	},
+	createOnce(context) {
+		function check(node: ESTree.Node, source: ESTree.Node | null) {
+			const name = staticString(source ?? undefined);
+			if (name !== undefined && isEffectModule(name)) {
+				context.report({ node, messageId: 'valueImport', data: { source: name } });
+			}
+		}
+		return {
+			ImportDeclaration(node) {
+				if (!isTypeOnly(node.importKind, node.specifiers)) check(node, node.source);
+			},
+			ExportNamedDeclaration(node) {
+				if (node.source && !isTypeOnly(node.exportKind, node.specifiers)) check(node, node.source);
+			},
+			ExportAllDeclaration(node) {
+				if (node.exportKind !== 'type') check(node, node.source);
+			},
+			ImportExpression(node) {
+				check(node, node.source);
+			},
+		};
+	},
+});
+
 export default definePlugin({
 	meta: {
 		name: 'eslint-plugin-mahir-effect',
@@ -288,5 +338,6 @@ export default definePlugin({
 		'no-run-outside-edge': noRunOutsideEdge,
 		'no-throw-in-gen': noThrowInGen,
 		'return-yield-error': returnYieldError,
+		'types-only-imports': typesOnlyImports,
 	},
 });

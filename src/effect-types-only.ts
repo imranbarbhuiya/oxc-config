@@ -1,19 +1,12 @@
 import { defineConfig } from 'oxlint';
 
-import { nativePlugins } from './config.js';
-
-const message = 'UI uses generated OpenAPI types and openapi-fetch; import Effect types only.';
+import { localPlugin, nativePlugins } from './config.js';
 
 const config = defineConfig({
 	plugins: nativePlugins,
+	jsPlugins: [localPlugin('mahir-effect', './plugins/effect.js')],
 	rules: {
-		'no-restricted-imports': [
-			2,
-			{
-				paths: [{ name: 'effect', message, allowTypeImports: true }],
-				patterns: [{ group: ['effect/*', '@effect/*'], message, allowTypeImports: true }],
-			},
-		],
+		'mahir-effect/types-only-imports': 2,
 	},
 });
 

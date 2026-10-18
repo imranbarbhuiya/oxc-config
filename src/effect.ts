@@ -46,7 +46,11 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 			variables: true,
 		},
 	],
+	'no-redeclare': 0,
+	'promise/prefer-await-to-callbacks': 0,
+	'promise/prefer-await-to-then': 0,
 	'require-yield': 0,
+	'unicorn/prefer-top-level-await': 0,
 	'unicorn/throw-new-error': 0,
 };
 

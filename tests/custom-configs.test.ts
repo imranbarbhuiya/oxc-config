@@ -291,15 +291,35 @@ function ruleLines(stdout: string, rule: string) {
 }
 
 describe('effect', () => {
-	test('idiomatic Effect v4 code has no diagnostics under common, typescript, node, module and effect', async () => {
+	test.each(['valid.ts', 'idioms.ts', 'idioms-resources.ts'])(
+		'idiomatic Effect v4 code in %s has no diagnostics under common, typescript, node, module and effect',
+		async (fixture) => {
+			await withOxlintProject(
+				join(effectFixtures, fixture),
+				`src/${fixture}`,
+				['common', 'typescript', 'node', 'module', 'effect'],
+				async (project) => {
+					const result = await runOxlint(project, true, [project.file], []);
+					expect(diagnostics(result.stdout)).toEqual([]);
+					expect(result.exitCode).toBe(0);
+				},
+			);
+		},
+	);
+
+	test('value redeclarations are still reported with no-redeclare off', async () => {
 		await withOxlintProject(
-			join(effectFixtures, 'valid.ts'),
-			'src/valid.ts',
+			join(effectFixtures, 'redeclare.ts'),
+			'src/redeclare.ts',
 			['common', 'typescript', 'node', 'module', 'effect'],
 			async (project) => {
 				const result = await runOxlint(project, true, [project.file], []);
-				expect(diagnostics(result.stdout)).toEqual([]);
-				expect(result.exitCode).toBe(0);
+				expect(result.exitCode).toBe(1);
+				expect(
+					diagnostics(result.stdout).some(({ message }) =>
+						message.includes('Identifier `total` has already been declared'),
+					),
+				).toBeTrue();
 			},
 		);
 	});
@@ -410,10 +430,41 @@ describe('effect', () => {
 			['effect-types-only'],
 			async (project) => {
 				const result = await runOxlint(project);
-				expect(ruleLines(result.stdout, 'no-restricted-imports').toSorted((left, right) => left - right)).toEqual([
-					1, 2, 4,
-				]);
+				expect(ruleLines(result.stdout, 'types-only-imports')).toEqual([1, 2, 4]);
 				expect(diagnostics(result.stdout).every(({ message }) => !message.includes('effect/Result'))).toBeTrue();
+			},
+		);
+	});
+
+	test('effect-types-only bans value re-exports and dynamic imports', async () => {
+		await withOxlintProject(
+			join(effectFixtures, 'types-only-exports.ts'),
+			'src/ui.ts',
+			['effect-types-only'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(ruleLines(result.stdout, 'types-only-imports')).toEqual([1, 2, 5, 8]);
+			},
+		);
+	});
+
+	test('effect-types-only composes with a consumer no-restricted-imports config', async () => {
+		await withOxlintProject(
+			join(effectFixtures, 'types-only-composed.ts'),
+			'src/ui.ts',
+			['common', 'effect-types-only'],
+			async (project) => {
+				const result = await runOxlint(project);
+				expect(ruleLines(result.stdout, 'types-only-imports')).toEqual([2]);
+				expect(ruleLines(result.stdout, 'no-restricted-imports')).toEqual([1]);
+			},
+			{
+				rules: {
+					'no-restricted-imports': [
+						2,
+						{ paths: [{ name: 'react-native', importNames: ['Image'], message: 'Use the shared Image component.' }] },
+					],
+				},
 			},
 		);
 	});
