@@ -44,6 +44,8 @@ Available options:
 - `--query` / `--no-query`
 - `--unistyles` / `--no-unistyles` (native only, cannot be combined with `--native-tailwind`)
 - `--effect-types-only` (Next.js, React and React Native)
+- `-r, --runner <name>` picks the tools the scripts run: `oxc` (oxlint, tsrs and oxfmt, the default) or `bun` (`bun lint` and `bun fmt`). See [Bun](#bun)
+- `--migrate-to-bun` switches an existing setup's scripts to `bun lint` and `bun fmt`. See [Bun](#bun)
 - `-y, --yes` skips prompts and uses detected defaults
 - `--cwd <path>` changes the target directory
 - `-h, --help` shows help
@@ -225,7 +227,7 @@ export default defineConfig({
 
 ### `@effect/tsgo` projects
 
-`effect-tsgo patch --typescript --oxlint --tsrs` (and `effect-tsgo oxlint`) supports only specific versions of each tool. Pin `oxlint`, `oxlint-tsgolint` and `tsrs` to versions in the "Supported Package Versions" table of the `@effect/tsgo` README you have installed. Otherwise the patch fails or leaves the Effect rules off. This package needs Oxlint 1.94 or later, `oxlint-tsgolint` 7.0.2007 or later and `tsrs` `7.1.0-beta.tsrs2` or later. `@effect/tsgo` 0.73.2 supports Oxlint 1.94, `oxlint-tsgolint` 7.0.2007 and `tsrs` `7.1.0-beta.tsrs2` and `tsrs3`.
+`effect-tsgo patch --typescript --oxlint --tsrs` (and `effect-tsgo oxlint`) supports only specific versions of each tool. Pin `oxlint`, `oxlint-tsgolint` and `tsrs` to versions in the "Supported Package Versions" table of the `@effect/tsgo` README you have installed. Otherwise the patch fails or leaves the Effect rules off. This package needs Oxlint 1.90 or later, `oxlint-tsgolint` 7.0.2005 or later and `tsrs` `7.1.0-beta.tsrs2` or later. `@effect/tsgo` 0.73.2 supports Oxlint 1.91 to 1.94, `oxlint-tsgolint` 7.0.2005 to 7.0.2007 and `tsrs` `7.1.0-beta.tsrs2` and `tsrs3`.
 
 Because Oxlint switches to `tsrs-lint` whenever `tsrs` is installed, a project that installs `tsrs` for type checking also lints on tsrs. Patch tsrs too (`--tsrs`), or run `effect-tsgo --tsrs-lint oxlint`.
 
@@ -251,6 +253,41 @@ The `unistyles` fragment replaces `tailwind` and `native-tailwind` in Unistyles 
 - `mahir-unistyles/no-raw-colors` flags hex, `rgb()`, `hsl()` and similar colour strings, plus named colours on colour properties, inside `StyleSheet.create(...)` and `style` props. Files under `**/theme/**` and `**/tokens/**` are skipped; change this with `{ allow: [...] }`
 - `mahir-unistyles/no-inline-style-objects` flags inline object literals in `style` and `*Style` props unless every value is a variable or member access such as `theme.colors.text`
 - `mahir-unistyles/create-uses-theme` warns when a file that imports the theme (an import from a `theme` or `tokens` path, an import whose name contains `theme`, or `useUnistyles`) calls `StyleSheet.create` with a plain object instead of `StyleSheet.create((theme, rt) => ({ ... }))`
+
+## Bun
+
+[`bun lint`](https://bun.com/docs/lint), [`bun fmt`](https://bun.com/docs/format) and [`bun check`](https://bun.com/docs/runtime/check) read `oxlint.config.ts` and `oxfmt.config.ts`, so these configs run on Bun's built-in tools without changes. `bun lint` runs type-aware rules with its own type checker, so it needs neither tsrs nor `oxlint-tsgolint`.
+
+> [!NOTE]
+> `bun lint` ships only in canary builds for now (`bun upgrade --canary`). `bun fmt` and `bun check` are in Bun 1.4.5.
+
+Set up a project with Bun's tools:
+
+```bash
+npx @imranbarbhuiya/oxc-config --runner bun
+```
+
+The scripts call `bun lint --no-script` and `bun fmt --no-script`. Without `--no-script`, `bun lint` in any script other than `lint` runs the `lint` script, so `lint:check` would apply `--fix`. `oxlint` and `oxfmt` are still installed, for `defineConfig` and the editor extension, because Bun has no language server.
+
+Move an existing project to Bun:
+
+```bash
+npx @imranbarbhuiya/oxc-config --migrate-to-bun
+```
+
+It changes nothing unless every check passes:
+
+1. `bun lint --doctor` and `bun fmt --doctor` accept the configs and list no unsupported rules
+2. `oxlint` and `bun lint` report the same problems, and `oxfmt --check` and `bun fmt --check` flag the same files
+3. Then it rewrites scripts that call `oxlint` or `oxfmt` directly. Scripts that run them through `npx`, `bunx`, `node` and similar, or use `--lsp`, `--migrate` or `--init`, are left alone and listed
+
+It does not uninstall anything. `bun lint --doctor` lists packages you can remove, such as tsrs or `oxlint-tsgolint`.
+
+What Bun does not support:
+
+- **jsdoc rules.** `bun lint` has no native `jsdoc/*` rules, so the `jsdoc` and `tsdoc` fragments (and the `library` preset) need oxlint. The CLI refuses `--runner bun` for `library`
+- **Effect diagnostics.** `bun check` ignores TypeScript language service plugins such as `@effect/language-service`, and `bun lint` cannot load the `effecttsgo` rules. Keep tsrs or tsgo for Effect projects
+- **Newer Oxlint and Oxfmt features.** `bun lint` matches Oxlint 1.87 and `bun fmt` matches Oxfmt 0.72. CI runs a compatibility test on Bun canary to catch options Bun does not accept yet
 
 ## MDX
 

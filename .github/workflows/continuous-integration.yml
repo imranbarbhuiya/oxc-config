@@ -31,3 +31,25 @@ jobs:
         run: bun run lint:check
       - name: Run Oxfmt
         run: bun run format:check
+  Bun:
+    name: Bun lint and fmt compatibility
+    runs-on: ubuntu-latest
+    # bun lint ships only in canary builds for now, so a canary regression should not block a release.
+    continue-on-error: true
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: canary
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+      - name: Build
+        run: bun run build
+      - name: Run Bun Compatibility Tests
+        run: bun test tests/bun-compat.test.ts

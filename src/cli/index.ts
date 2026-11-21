@@ -7,6 +7,8 @@ import { parseArgs } from 'node:util';
 import * as p from '@clack/prompts';
 import { addDevDependency, detectPackageManager } from 'nypm';
 
+import { BUN_FMT, BUN_LINT, checkBunSupport, compareWithOxc, hasBunLint, rewriteScripts } from './bun.js';
+
 interface PresetConfig {
 	configs: string[];
 	description: string;
@@ -77,6 +79,12 @@ const PACKAGE_PRESET_MAP: Record<string, string> = {
 
 const DETECTION_PRIORITY = ['next', 'react-native', 'react', '@nestjs/core', 'effect'];
 
+const RUNNERS = ['oxc', 'bun'] as const;
+type Runner = (typeof RUNNERS)[number];
+
+// bun lint has no jsdoc/* rules, and tsdoc extends jsdoc.
+const PRESETS_WITHOUT_BUN = new Set(['library']);
+
 const { values: options } = parseArgs({
 	options: {
 		preset: { type: 'string', short: 'p' },
@@ -95,6 +103,8 @@ const { values: options } = parseArgs({
 		unistyles: { type: 'boolean', default: false },
 		'no-unistyles': { type: 'boolean', default: false },
 		'effect-types-only': { type: 'boolean', default: false },
+		runner: { type: 'string', short: 'r' },
+		'migrate-to-bun': { type: 'boolean', default: false },
 		yes: { type: 'boolean', short: 'y', default: false },
 		cwd: { type: 'string' },
 		help: { type: 'boolean', short: 'h', default: false },
@@ -127,6 +137,8 @@ Options:
   --unistyles          Include Unistyles 3 rules (native, not with --native-tailwind)
   --no-unistyles       Exclude Unistyles 3 rules
   --effect-types-only  Allow only type imports from Effect (nextjs, react, native)
+  -r, --runner <name>  Tools that run the config: oxc (oxlint, tsrs, oxfmt) or bun (bun lint, bun fmt)
+  --migrate-to-bun     Switch an existing setup's scripts from oxlint and oxfmt to bun lint and bun fmt
   -y, --yes            Skip prompts and use defaults
   --cwd <path>         Working directory (defaults to current directory)
   -h, --help           Show this help message
@@ -135,6 +147,8 @@ Examples:
   npx @imranbarbhuiya/oxc-config
   npx @imranbarbhuiya/oxc-config --preset nextjs --tailwind
   npx @imranbarbhuiya/oxc-config -p react -y
+  npx @imranbarbhuiya/oxc-config -p node --runner bun
+  npx @imranbarbhuiya/oxc-config --migrate-to-bun
 `);
 }
 
@@ -251,29 +265,35 @@ function hasTailwind(dependencies: Record<string, string>): boolean {
 	return Boolean(dependencies.tailwindcss || dependencies.nativewind);
 }
 
-async function updateScripts(packageJsonPath: string): Promise<void> {
+async function readPackageJson(packageJsonPath: string): Promise<Record<string, unknown>> {
 	if (!(await fileExists(packageJsonPath))) {
 		p.log.error('No package.json found. Run this command in a project with package.json.');
 		process.exit(1);
 	}
+	return JSON.parse(await fs.readFile(packageJsonPath, 'utf8')) as Record<string, unknown>;
+}
 
-	const content = await fs.readFile(packageJsonPath, 'utf8');
-	const packageJson = JSON.parse(content) as Record<string, unknown>;
+async function updateScripts(packageJsonPath: string, runner: Runner): Promise<void> {
+	const packageJson = await readPackageJson(packageJsonPath);
 	const scripts = (packageJson.scripts as Record<string, string> | undefined) ?? {};
+	const [linter, formatter] = runner === 'bun' ? [BUN_LINT, BUN_FMT] : ['oxlint', 'oxfmt'];
 
-	scripts.lint = 'oxlint --fix .';
-	scripts['lint:check'] = 'oxlint .';
-	scripts.format = 'oxfmt';
-	scripts['format:check'] = 'oxfmt --check';
+	scripts.lint = `${linter} --fix .`;
+	scripts['lint:check'] = `${linter} .`;
+	scripts.format = formatter;
+	scripts['format:check'] = `${formatter} --check`;
 	packageJson.scripts = scripts;
 
 	await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, '\t') + '\n');
 }
 
-async function installDependencies(cwd: string, includeQuery: boolean): Promise<string> {
+async function installDependencies(cwd: string, includeQuery: boolean, runner: Runner): Promise<string> {
 	const pm = await detectPackageManager(cwd);
 	const pmName = pm?.name ?? 'npm';
-	const dependencies = [PACKAGE_NAME, 'oxlint', `tsrs@${TSRS_VERSION}`, 'oxfmt'];
+	// With Bun, oxlint and oxfmt stay for `defineConfig` and the editor extension. bun lint brings its own
+	// type checker, so tsrs is not needed.
+	const dependencies =
+		runner === 'bun' ? [PACKAGE_NAME, 'oxlint', 'oxfmt'] : [PACKAGE_NAME, 'oxlint', `tsrs@${TSRS_VERSION}`, 'oxfmt'];
 
 	if (includeQuery) dependencies.push('@tanstack/eslint-plugin-query');
 
@@ -318,6 +338,57 @@ p.intro('@imranbarbhuiya/oxc-config setup');
 
 const cwd = options.cwd ? path.resolve(options.cwd) : process.cwd();
 const skipPrompts = options.yes;
+
+async function requireBunLint(): Promise<void> {
+	if (await hasBunLint(cwd)) return;
+	p.log.error('bun lint is not available. It needs a Bun build that has it: run `bun upgrade --canary`.');
+	process.exit(1);
+}
+
+if (options['migrate-to-bun']) {
+	const packageJsonPath = path.join(cwd, 'package.json');
+	const packageJson = await readPackageJson(packageJsonPath);
+	await requireBunLint();
+
+	const spinner = p.spinner();
+	spinner.start('Checking that Bun supports this config');
+	const unsupported = await checkBunSupport(cwd);
+	spinner.stop(unsupported.length > 0 ? 'Bun does not support this config' : 'Bun supports this config');
+	if (unsupported.length > 0) {
+		for (const problem of unsupported) p.log.error(problem);
+		p.cancel('Nothing was changed. Keep oxlint and oxfmt, or remove what Bun does not support first.');
+		process.exit(1);
+	}
+
+	spinner.start('Comparing oxlint and oxfmt with bun lint and bun fmt');
+	const differences = await compareWithOxc(cwd);
+	spinner.stop(differences.length > 0 ? 'The reports differ' : 'Both report the same problems');
+	if (differences.length > 0) {
+		for (const difference of differences) p.log.error(difference);
+		p.cancel('Nothing was changed, because Bun would report different problems.');
+		process.exit(1);
+	}
+
+	const rewrite = rewriteScripts((packageJson.scripts as Record<string, string> | undefined) ?? {});
+	for (const { name, reason, script } of rewrite.skipped) p.log.warn(`Left "${name}" as it is (${reason}): ${script}`);
+	if (rewrite.changed.length === 0) {
+		p.outro('No script runs oxlint or oxfmt directly, so nothing was changed.');
+		process.exit(0);
+	}
+	for (const { after, before, name } of rewrite.changed) p.log.info(`${name}: ${before} → ${after}`);
+	packageJson.scripts = rewrite.scripts;
+	await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, '\t') + '\n');
+	p.outro(
+		'Scripts now use bun lint and bun fmt. Keep oxlint and oxfmt for the editor extension and defineConfig; `bun lint --doctor` lists packages you can remove, such as tsrs or oxlint-tsgolint.',
+	);
+	process.exit(0);
+}
+
+if (options.runner !== undefined && !RUNNERS.includes(options.runner as Runner)) {
+	p.log.error(`Unknown runner: ${options.runner}. Use oxc or bun.`);
+	process.exit(1);
+}
+let runner = options.runner as Runner | undefined;
 const dependencies = await getDependencies(cwd);
 
 let preset = options.preset;
@@ -506,7 +577,38 @@ if (includeEffectTypesOnly === undefined) {
 	}
 }
 
-p.log.step(`Setting up Oxlint and Oxfmt with preset: ${preset}`);
+if (runner === undefined) {
+	if (skipPrompts || PRESETS_WITHOUT_BUN.has(preset) || !(await hasBunLint(cwd))) runner = 'oxc';
+	else {
+		const result = await p.select({
+			message: 'Which tools should run lint and format?',
+			options: [
+				{ value: 'oxc', label: 'oxc', hint: 'oxlint with tsrs, and oxfmt' },
+				{ value: 'bun', label: 'bun', hint: 'bun lint and bun fmt, built into Bun' },
+			],
+		});
+		if (p.isCancel(result)) {
+			p.cancel('Operation cancelled.');
+			process.exit(0);
+		}
+		runner = result;
+	}
+}
+
+if (runner === 'bun') {
+	if (PRESETS_WITHOUT_BUN.has(preset)) {
+		p.log.error(`bun lint has no jsdoc rules, which the ${preset} preset uses. Use --runner oxc.`);
+		process.exit(1);
+	}
+	await requireBunLint();
+	if (preset === 'effect-node') {
+		p.log.warn(
+			'bun check and bun lint do not load @effect/language-service or the effecttsgo rules. Keep tsrs or tsgo for Effect diagnostics.',
+		);
+	}
+}
+
+p.log.step(`Setting up Oxlint and Oxfmt with preset: ${preset}, run by ${runner}`);
 if (includeTailwind) p.log.info('Including Tailwind CSS support');
 if (includeI18n) p.log.info('Including next-intl i18n rules');
 if (includeNativeTailwind) p.log.info('Including React Native Tailwind className rules');
@@ -537,10 +639,10 @@ await fs.writeFile(
 await fs.writeFile(oxfmtConfigPath, generateOxfmtConfig());
 p.log.success('Created oxlint.config.ts and oxfmt.config.ts');
 
-await updateScripts(packageJsonPath);
+await updateScripts(packageJsonPath, runner);
 p.log.success('Updated package.json scripts');
 
-const pmName = await installDependencies(cwd, includeQuery);
+const pmName = await installDependencies(cwd, includeQuery, runner);
 const runPrefix = pmName === 'npm' ? 'npm run' : pmName;
 p.outro(`Setup complete! Run \`${runPrefix} lint && ${runPrefix} format\``);
 
