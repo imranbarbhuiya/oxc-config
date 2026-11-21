@@ -23,6 +23,8 @@ interface ExtraConfigs {
 }
 
 const PACKAGE_NAME = '@imranbarbhuiya/oxc-config';
+// The newest tsrs that `effect-tsgo patch --tsrs` supports, so Effect projects can patch it.
+const TSRS_VERSION = '7.1.0-beta.tsrs3';
 
 const PRESETS: Record<string, PresetConfig> = {
 	nextjs: {
@@ -271,7 +273,7 @@ async function updateScripts(packageJsonPath: string): Promise<void> {
 async function installDependencies(cwd: string, includeQuery: boolean): Promise<string> {
 	const pm = await detectPackageManager(cwd);
 	const pmName = pm?.name ?? 'npm';
-	const dependencies = [PACKAGE_NAME, 'oxlint', 'oxlint-tsgolint', 'oxfmt'];
+	const dependencies = [PACKAGE_NAME, 'oxlint', `tsrs@${TSRS_VERSION}`, 'oxfmt'];
 
 	if (includeQuery) dependencies.push('@tanstack/eslint-plugin-query');
 

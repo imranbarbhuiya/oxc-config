@@ -47,6 +47,9 @@
 			"effect": [
 				"./dist/effect.d.ts"
 			],
+			"effect-tsgo": [
+				"./dist/effect-tsgo.d.ts"
+			],
 			"effect-types-only": [
 				"./dist/effect-types-only.d.ts"
 			],
@@ -119,6 +122,11 @@
 			"types": "./dist/effect.d.ts",
 			"import": "./dist/effect.js",
 			"default": "./dist/effect.js"
+		},
+		"./effect-tsgo": {
+			"types": "./dist/effect-tsgo.d.ts",
+			"import": "./dist/effect-tsgo.js",
+			"default": "./dist/effect-tsgo.js"
 		},
 		"./effect-types-only": {
 			"types": "./dist/effect-types-only.d.ts",
@@ -210,7 +218,7 @@
 	},
 	"dependencies": {
 		"@clack/prompts": "^1.8.1",
-		"@oxlint/plugins": "1.89.0",
+		"@oxlint/plugins": "1.94.0",
 		"eslint": "^10.13.0",
 		"eslint-plugin-jsdoc": "^65.4.2",
 		"eslint-plugin-n": "^18.5.0",
@@ -220,23 +228,29 @@
 		"oxlint-tailwindcss": "^1.16.0"
 	},
 	"devDependencies": {
+		"@effect/tsgo": "0.73.2",
 		"@types/bun": "^1.4.4",
 		"@types/node": "^26.6.5",
 		"@typescript-eslint/utils": "^8.72.0",
 		"effect": "^4.0.6",
-		"oxfmt": "^0.75.0",
-		"oxlint": "^1.90.0",
-		"oxlint-tsgolint": "^7.0.2005",
+		"oxfmt": "^0.79.0",
+		"oxlint": "^1.94.0",
 		"tsdown": "^0.23.2",
+		"tsrs": "7.1.0-beta.tsrs3",
 		"typescript": "6.0.3"
 	},
 	"peerDependencies": {
+		"@effect/tsgo": ">=0.73.2",
 		"effect": "^4.0.6",
-		"oxfmt": ">=0.74.0 <0.76.0",
-		"oxlint": "^1.89.0",
-		"oxlint-tsgolint": "^7.0.2005"
+		"oxfmt": "^0.79.0",
+		"oxlint": "^1.94.0",
+		"oxlint-tsgolint": ">=7.0.2007",
+		"tsrs": ">=7.1.0-beta.tsrs2"
 	},
 	"peerDependenciesMeta": {
+		"@effect/tsgo": {
+			"optional": true
+		},
 		"effect": {
 			"optional": true
 		},
@@ -244,6 +258,9 @@
 			"optional": true
 		},
 		"oxlint-tsgolint": {
+			"optional": true
+		},
+		"tsrs": {
 			"optional": true
 		}
 	},

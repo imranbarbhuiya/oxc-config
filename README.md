@@ -22,7 +22,7 @@ It detects the package manager and project type, creates `oxlint.config.ts` and 
 
 - `@imranbarbhuiya/oxc-config`
 - `oxlint`
-- `oxlint-tsgolint`
+- `tsrs` `7.1.0-beta.tsrs3`, the backend for type-aware rules (the newest version `@effect/tsgo` can patch)
 - `oxfmt`
 - Any selected optional JavaScript plugins
 
@@ -55,7 +55,7 @@ The CLI offers optional features only where they apply. For example, i18n is ava
 Install the config and Oxc tools:
 
 ```bash
-npm install --save-dev @imranbarbhuiya/oxc-config oxlint oxlint-tsgolint oxfmt
+npm install --save-dev @imranbarbhuiya/oxc-config oxlint tsrs oxfmt
 ```
 
 Create `oxlint.config.ts`:
@@ -75,7 +75,29 @@ export default defineConfig({
 });
 ```
 
-`options.typeAware` belongs at the root of the Oxlint config. It enables type-aware linting through `oxlint-tsgolint`.
+`options.typeAware` belongs at the root of the Oxlint config. It turns on the type-aware rules in the `typescript` fragment.
+
+## Type-aware linting with tsrs
+
+Install [`tsrs`](https://github.com/oxc-project/tsrs), the Rust port of the TypeScript 7 checker, as the backend for type-aware rules. Oxlint 1.92 and later finds its `tsrs-lint` launcher in `node_modules/.bin` and uses it in place of `oxlint-tsgolint`. It runs the same rules with the same options. Install `oxlint-tsgolint` instead only if you need tsgolint's Go profiling variables. `OXLINT_TSGOLINT_PATH` overrides the discovery.
+
+Oxlint picks `tsrs-lint` whenever `tsrs` is installed, including when it is only there for `tsrs --noEmit`. Upgrading Oxlint to 1.92 or later in a project that already has both `tsrs` and `oxlint-tsgolint` therefore switches the lint engine. Set `TSRS_FAST=1` to run tsrs with its fast preset.
+
+### Type checking in the lint run
+
+The shared presets leave `options.typeCheck` off. To report TypeScript errors from the same lint run, set it in your own config:
+
+```ts
+export default defineConfig({
+	extends: [common, node, typescript, module],
+	options: {
+		typeAware: true,
+		typeCheck: true,
+	},
+});
+```
+
+Only files Oxlint lints are type-checked. Ignored files, declaration files and program-wide diagnostics without a location are not reported, so keep a separate `tsrs --noEmit` (or `tsc --noEmit`) run in CI. Leave it off in monorepos that already type-check each package with its own tsconfig, so the root lint does not run a second type check.
 
 Create `oxfmt.config.ts`:
 
@@ -120,6 +142,7 @@ Add scripts to `package.json`:
 - `api-error` requires allowed error classes in TanStack Query functions
 - `effect` contains Effect v4 rules for backend code
 - `effect-types-only` allows only type imports from Effect, for UI packages
+- `effect-tsgo` extends the `@effect/tsgo` recommended Oxlint preset (`effecttsgo/*` rules). Opt-in, needs `@effect/tsgo` and a patched Oxlint
 - `unistyles` contains Unistyles 3 rules for React Native
 
 Fragments can be combined through `defineConfig({ extends: [...] })`. The Tailwind plugin ships with this package. Install a third-party plugin only when you add it yourself, such as TanStack Query.
@@ -195,6 +218,26 @@ export default defineConfig({
 	extends: [common, typescript, module, native, effectTypesOnly],
 	rules: {
 		'no-restricted-imports': [2, { paths: [{ name: 'react-native', importNames: ['Image'] }] }],
+	},
+});
+```
+
+### `@effect/tsgo` projects
+
+`effect-tsgo patch --typescript --oxlint --tsrs` (and `effect-tsgo oxlint`) supports only specific versions of each tool. Pin `oxlint`, `oxlint-tsgolint` and `tsrs` to versions in the "Supported Package Versions" table of the `@effect/tsgo` README you have installed. Otherwise the patch fails or leaves the Effect rules off. This package needs Oxlint 1.94 or later, `oxlint-tsgolint` 7.0.2007 or later and `tsrs` `7.1.0-beta.tsrs2` or later. `@effect/tsgo` 0.73.2 supports Oxlint 1.94, `oxlint-tsgolint` 7.0.2007 and `tsrs` `7.1.0-beta.tsrs2` and `tsrs3`.
+
+Because Oxlint switches to `tsrs-lint` whenever `tsrs` is installed, a project that installs `tsrs` for type checking also lints on tsrs. Patch tsrs too (`--tsrs`), or run `effect-tsgo --tsrs-lint oxlint`.
+
+If your type check does not run the `@effect/language-service` plugin, add the opt-in `effect-tsgo` fragment to get the Effect diagnostics from Oxlint. It extends `@effect/tsgo/oxlint-presets` `recommended`, and stock Oxlint rejects its `effecttsgo` plugin, so use it only with a patched Oxlint or `effect-tsgo oxlint`:
+
+```ts
+import effect from '@imranbarbhuiya/oxc-config/effect';
+import effectTsgo from '@imranbarbhuiya/oxc-config/effect-tsgo';
+
+export default defineConfig({
+	extends: [common, node, typescript, module, effect, effectTsgo],
+	options: {
+		typeAware: true,
 	},
 });
 ```

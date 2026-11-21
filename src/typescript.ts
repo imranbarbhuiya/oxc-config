@@ -56,6 +56,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 			ignoredTypeNames: ['RegExp'],
 		},
 	],
+	'typescript/no-deprecated': 1,
 	'typescript/no-confusing-non-null-assertion': 2,
 	'no-dupe-class-members': 2,
 	'typescript/no-duplicate-enum-values': 2,
@@ -93,6 +94,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 			allowInGenericTypeArguments: true,
 		},
 	],
+	'typescript/no-generated-empty-object-type': 2,
 	'typescript/no-meaningless-void-operator': [
 		2,
 		{
@@ -103,10 +105,14 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/no-misused-promises': [
 		2,
 		{
-			checksConditionals: true,
+			checksConditionals: {
+				flagUnions: 'strict',
+			},
 			checksVoidReturn: false,
 		},
 	],
+	'typescript/no-misused-spread': 2,
+	'typescript/no-mixed-enums': 2,
 	'typescript/no-namespace': 0,
 	'typescript/no-non-null-asserted-nullish-coalescing': 2,
 	'typescript/no-non-null-asserted-optional-chain': 2,
@@ -114,6 +120,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 		2,
 		{
 			builtinGlobals: true,
+			ignoreDeclarationMerge: true,
 		},
 	],
 	'typescript/no-redundant-type-constituents': 0,
@@ -128,11 +135,15 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/no-unnecessary-boolean-literal-compare': 2,
 	'typescript/no-unnecessary-condition': 1,
 	'typescript/no-unnecessary-qualifier': 2,
+	'typescript/no-unnecessary-template-expression': 2,
+	'typescript/no-unnecessary-type-arguments': 2,
 	'typescript/no-unnecessary-type-assertion': 2,
 	'typescript/no-unnecessary-type-constraint': 2,
+	'typescript/no-unnecessary-type-conversion': 2,
 	'typescript/no-unsafe-argument': 0,
 	'typescript/no-unsafe-assignment': 0,
 	'typescript/no-unsafe-call': 0,
+	'typescript/no-unsafe-enum-assignment': 2,
 	'typescript/no-unsafe-enum-comparison': 0,
 	'typescript/no-unsafe-function-type': 0,
 	'typescript/no-unsafe-member-access': 0,
@@ -140,6 +151,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/no-unsafe-unary-minus': 0,
 	'no-unused-expressions': 2,
 	'typescript/no-unused-vars': 0,
+	'typescript/no-useless-default-assignment': 2,
 	'no-use-before-define': [
 		2,
 		{
@@ -151,6 +163,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'no-useless-constructor': 2,
 	'typescript/only-throw-error': 2,
 	'typescript/prefer-as-const': 0,
+	'typescript/prefer-find': 2,
 	'typescript/prefer-for-of': 2,
 	'typescript/prefer-function-type': 2,
 	'typescript/prefer-includes': 2,
@@ -167,6 +180,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/prefer-regexp-exec': 2,
 	'typescript/prefer-return-this-type': 2,
 	'typescript/prefer-string-starts-ends-with': 2,
+	'typescript/related-getter-setter-pairs': 2,
 	'typescript/require-array-sort-compare': [
 		2,
 		{
@@ -177,6 +191,12 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/restrict-plus-operands': 2,
 	'typescript/restrict-template-expressions': 0,
 	'typescript/return-await': [2, 'in-try-catch'],
+	'typescript/switch-exhaustiveness-check': [
+		2,
+		{
+			considerDefaultExhaustiveForUnions: true,
+		},
+	],
 	'typescript/triple-slash-reference': [
 		2,
 		{
@@ -187,6 +207,7 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	],
 	'typescript/unbound-method': 0,
 	'typescript/unified-signatures': 2,
+	'typescript/use-unknown-in-catch-callback-variable': 2,
 	'consistent-return': 0,
 	'default-case': 0,
 	'default-case-last': 0,

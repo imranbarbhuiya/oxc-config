@@ -251,7 +251,7 @@ const createUsesTheme = defineRule({
 			},
 			ImportDeclaration(node) {
 				if (node.importKind === 'type') return;
-				const source = String(node.source.value);
+				const source = node.source.value;
 				if (THEME_SOURCE.test(source)) importsTheme = true;
 				for (const specifier of node.specifiers) {
 					if (specifier.type === 'ImportSpecifier' && specifier.importKind === 'type') continue;
