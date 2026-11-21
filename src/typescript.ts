@@ -105,9 +105,9 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/no-misused-promises': [
 		2,
 		{
-			checksConditionals: {
-				flagUnions: 'strict',
-			},
+			// The default `flagUnions: 'none'`. `strict` flags every truthiness check on a React 19
+			// `ReactNode`, because it includes `Promise<AwaitedReactNode>`.
+			checksConditionals: true,
 			checksVoidReturn: false,
 		},
 	],
@@ -120,7 +120,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 		2,
 		{
 			builtinGlobals: true,
-			ignoreDeclarationMerge: true,
 		},
 	],
 	'typescript/no-redundant-type-constituents': 0,
@@ -139,7 +138,6 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'typescript/no-unnecessary-type-arguments': 2,
 	'typescript/no-unnecessary-type-assertion': 2,
 	'typescript/no-unnecessary-type-constraint': 2,
-	'typescript/no-unnecessary-type-conversion': 2,
 	'typescript/no-unsafe-argument': 0,
 	'typescript/no-unsafe-assignment': 0,
 	'typescript/no-unsafe-call': 0,

@@ -53,6 +53,9 @@ const rules: NonNullable<OxlintConfig['rules']> = {
 	'require-yield': 0,
 	'unicorn/prefer-top-level-await': 0,
 	'unicorn/throw-new-error': 0,
+	// Spreading `Schema.Class` instances into plain objects is idiomatic, and `allow` can only
+	// name types, not every user-defined Schema class.
+	'typescript/no-misused-spread': 0,
 };
 
 const config = defineConfig({

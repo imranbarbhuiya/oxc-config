@@ -184,6 +184,7 @@ The fragment also turns off or relaxes rules that fire on idiomatic Effect code.
 - `no-redeclare` is off, so a schema and its type can share a name (`const UserId = Schema.String.pipe(Schema.brand('UserId'))` with `type UserId = typeof UserId.Type`). Oxlint has no TypeScript-aware variant that allows value and type pairs. Redeclared `let`, `const` and `class` bindings are still errors from the parser and TypeScript
 - `promise/prefer-await-to-callbacks`, `promise/prefer-await-to-then` and `unicorn/prefer-top-level-await` are off, because they flag `Effect.catch`, `Effect.catchTag`, `Effect.tapError` and `Stream.catch` as Promise chains or Node-style callbacks
 - `require-yield` and `unicorn/throw-new-error` are off
+- `typescript/no-misused-spread` is off, because spreading a `Schema.Class` instance into a plain object (`{ ...current, pages }`) is idiomatic and the rule's `allow` option cannot match every user-defined Schema class. `effect-types-only` turns it off too, for UIs that decode into Schema classes
 - `func-names` ignores generators
 - `no-use-before-define` allows classes referenced from inner scopes, so errors can be declared after the services that use them
 
