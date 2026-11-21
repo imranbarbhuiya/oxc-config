@@ -28,6 +28,8 @@ const UNSUPPORTED_FLAGS = /(?:^|\s)--(?:lsp|migrate|init)(?:[\s=]|$)/;
 // A tool name in command position: at the start, or after &&, ||, ; or |.
 const COMMAND = /(^|&&|\|\||;|\|)(\s*)(oxlint|oxfmt)(?=\s|$)/g;
 const INDIRECT = /(?:npx|bunx|pnpm\s+(?:exec|dlx)|yarn(?:\s+dlx)?|node)\s+\S*\b(?:oxlint|oxfmt)\b/;
+// Bun, Oxfmt and Oxlint colour their output when the environment asks for it, as CI runners do.
+const ANSI_ESCAPE = new RegExp(`${String.fromCodePoint(27)}\\[[0-9;]*m`, 'g');
 
 function run(command: string, args: string[], cwd: string): Promise<CommandResult> {
 	return new Promise((resolve) => {
@@ -47,7 +49,7 @@ function run(command: string, args: string[], cwd: string): Promise<CommandResul
 
 export async function hasBunLint(cwd: string): Promise<boolean> {
 	const result = await run('bun', ['lint', '--no-script', '--help'], cwd);
-	return result.status === 0 && result.stdout.includes('Usage: bun lint');
+	return result.status === 0 && result.stdout.replaceAll(ANSI_ESCAPE, '').includes('Usage: bun lint');
 }
 
 export function rewriteScripts(scripts: Record<string, string>): ScriptRewrite {
@@ -91,9 +93,12 @@ export async function checkBunSupport(cwd: string): Promise<string[]> {
 	return problems;
 }
 
+function lines(output: string): string[] {
+	return output.replaceAll(ANSI_ESCAPE, '').split('\n');
+}
+
 function lintFindings(output: string): string[] {
-	const findings = output
-		.split('\n')
+	const findings = lines(output)
 		.map((line) => /^(.+?:\d+:\d+):.*\[(?:Error|Warning)\/([^\]]+)\]\s*$/.exec(line))
 		.filter((match) => match !== null)
 		.map((match) => `${match[1]} ${match[2]}`);
@@ -101,8 +106,7 @@ function lintFindings(output: string): string[] {
 }
 
 function formatFindings(output: string): string[] {
-	const files = output
-		.split('\n')
+	const files = lines(output)
 		.map((line) => line.replace(/\s+\(\d+ms\)$/, '').trim())
 		.filter((line) => line !== '' && !/^(?:Checking|Format issues|Finished|All matched)/.test(line));
 	return files.toSorted((left, right) => left.localeCompare(right));
