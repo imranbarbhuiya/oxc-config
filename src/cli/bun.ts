@@ -31,7 +31,7 @@ const INDIRECT = /(?:npx|bunx|pnpm\s+(?:exec|dlx)|yarn(?:\s+dlx)?|node)\s+\S*\b(
 // Bun, Oxfmt and Oxlint colour their output when the environment asks for it, as CI runners do.
 const ANSI_ESCAPE = new RegExp(`${String.fromCodePoint(27)}\\[[0-9;]*m`, 'g');
 
-function run(command: string, args: string[], cwd: string): Promise<CommandResult> {
+export function run(command: string, args: string[], cwd: string): Promise<CommandResult> {
 	return new Promise((resolve) => {
 		const child = spawn(command, args, { cwd });
 		let stdout = '';

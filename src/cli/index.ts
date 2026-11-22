@@ -7,7 +7,7 @@ import { parseArgs } from 'node:util';
 import * as p from '@clack/prompts';
 import { addDevDependency, detectPackageManager } from 'nypm';
 
-import { BUN_FMT, BUN_LINT, checkBunSupport, compareWithOxc, hasBunLint, rewriteScripts } from './bun.js';
+import { BUN_FMT, BUN_LINT, checkBunSupport, compareWithOxc, hasBunLint, rewriteScripts, run } from './bun.js';
 
 interface PresetConfig {
 	configs: string[];
@@ -289,6 +289,8 @@ async function updateScripts(packageJsonPath: string, runner: Runner): Promise<v
 
 async function installDependencies(cwd: string, includeQuery: boolean, runner: Runner): Promise<string> {
 	const pm = await detectPackageManager(cwd);
+	// nypm throws when it can't detect one, as in a project with no lockfile and no packageManager field.
+	const packageManager = pm ?? 'npm';
 	const pmName = pm?.name ?? 'npm';
 	// With Bun, oxlint and oxfmt stay for `defineConfig` and the editor extension. bun lint brings its own
 	// type checker, so tsrs is not needed.
@@ -303,7 +305,7 @@ async function installDependencies(cwd: string, includeQuery: boolean, runner: R
 
 	for (const dependency of dependencies) {
 		spinner.message(`Installing ${dependency}`);
-		await addDevDependency(dependency, { cwd, silent: true });
+		await addDevDependency(dependency, { cwd, packageManager, silent: true });
 	}
 
 	spinner.stop('Dependencies installed');
@@ -643,6 +645,17 @@ await updateScripts(packageJsonPath, runner);
 p.log.success('Updated package.json scripts');
 
 const pmName = await installDependencies(cwd, includeQuery, runner);
+
+// The generated files don't follow the preset's import and package.json key order, and the install may
+// rewrite package.json, so format them with the Oxfmt just installed.
+const formatted = await run(
+	path.join(cwd, 'node_modules', '.bin', 'oxfmt'),
+	[oxlintConfigPath, oxfmtConfigPath, packageJsonPath],
+	cwd,
+);
+if (formatted.status === 0) p.log.success('Formatted the generated files');
+else p.log.warn(`Could not format the generated files; run format once:\n${formatted.output.trim()}`);
+
 const runPrefix = pmName === 'npm' ? 'npm run' : pmName;
 p.outro(`Setup complete! Run \`${runPrefix} lint && ${runPrefix} format\``);
 

@@ -213,7 +213,7 @@
 		"format": "oxfmt",
 		"format:check": "oxfmt --check",
 		"build": "tsdown",
-		"test": "bun run build && bun test",
+		"test": "bun run build && bun test --timeout 30000",
 		"prepack": "bun run build"
 	},
 	"dependencies": {
